@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { authClient } from "@/lib/auth/client";
@@ -31,16 +32,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [player, setPlayer] = useState<PublicPlayer | null>(null);
   const [status, setStatus] = useState<Status>("loading");
 
-  const refresh = useCallback(async () => {
-    try {
-      const { player: next } = await api<{ player: PublicPlayer }>("/api/me");
-      setPlayer(next);
-      setStatus("ready");
-      return next;
-    } catch {
-      setStatus("error");
-      return null;
-    }
+  const inflightRef = useRef<Promise<PublicPlayer | null> | null>(null);
+
+  const refresh = useCallback(() => {
+    inflightRef.current ??= api<{ player: PublicPlayer }>("/api/me")
+      .then(({ player: next }) => {
+        setPlayer(next);
+        setStatus("ready");
+        return next;
+      })
+      .catch(() => {
+        setStatus("error");
+        return null;
+      })
+      .finally(() => {
+        inflightRef.current = null;
+      });
+    return inflightRef.current;
   }, []);
 
   useEffect(() => {
