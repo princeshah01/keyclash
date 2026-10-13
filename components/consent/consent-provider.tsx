@@ -32,10 +32,15 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
 
   const setConsent = useCallback((value: Consent) => {
     void api("/api/consent", { method: "POST", body: JSON.stringify({ value }) });
+    setConsentState(value);
     if (value === "essential") {
       clearStoredOptions();
+      try {
+        localStorage.removeItem("kc-sound");
+      } catch {
+        return;
+      }
     }
-    setConsentState(value);
   }, []);
 
   const value = useMemo(() => ({ consent, ready, setConsent }), [consent, ready, setConsent]);

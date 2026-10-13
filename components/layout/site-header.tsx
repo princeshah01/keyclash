@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useChrome } from "@/components/layout/chrome-provider";
+import { SoundToggle } from "@/components/layout/sound-toggle";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { AccountMenu } from "@/components/player/account-menu";
 import { LogoMark } from "@/components/ui/marks";
@@ -84,6 +85,7 @@ export function SiteHeader() {
           >
             <Trophy size={16} weight="duotone" />
           </Link>
+          <SoundToggle />
           <ThemeToggle />
           <AccountMenu />
         </nav>

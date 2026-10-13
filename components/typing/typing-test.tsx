@@ -3,11 +3,13 @@
 import { ArrowCounterClockwise, CursorClick } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { MechanicalKeyboard } from "@/components/keyboard/mechanical-keyboard";
 import { useChrome } from "@/components/layout/chrome-provider";
 import { ResultsScreen } from "@/components/typing/results-screen";
 import { TestToolbar } from "@/components/typing/test-toolbar";
 import { WordItem } from "@/components/typing/word-item";
 import { useTypingTest } from "@/hooks/use-typing-test";
+import { modeDetailOf } from "@/lib/typing/options";
 import { cn } from "@/lib/utils";
 
 function isEditable(target: EventTarget | null) {
@@ -63,7 +65,7 @@ function RestartButton({ onRestart, visible }: { onRestart: () => void; visible:
 }
 
 export function TypingTest() {
-  const { setTypingActive } = useChrome();
+  const { setTypingActive, soundEnabled } = useChrome();
   const test = useTypingTest({ onActiveChange: setTypingActive });
   const {
     options,
@@ -132,6 +134,18 @@ export function TypingTest() {
   }
 
   const showLive = started;
+  const progress: Record<typeof options.mode, string | null> = {
+    time: `${timeLeft}s`,
+    words: `${wordIndex}/${options.wordOption}`,
+    quote: `${wordIndex}/${words.length}`,
+    zen: null,
+  };
+  const lcd = {
+    phase: started ? ("running" as const) : ("idle" as const),
+    wpm: liveWpm,
+    detail: progress[options.mode],
+    label: `${options.mode} ${modeDetailOf(options)}`.trim(),
+  };
 
   return (
     <motion.div
@@ -255,6 +269,12 @@ export function TypingTest() {
           </>
         )}
       </motion.div>
+
+      <MechanicalKeyboard
+        className="mt-2 hidden max-w-[860px] lg:block [@media(max-height:780px)]:hidden"
+        lcd={lcd}
+        soundEnabled={soundEnabled}
+      />
     </motion.div>
   );
 }
