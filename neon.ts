@@ -4,6 +4,7 @@ export default defineConfig({
   auth: true,
   buckets: {
     avatars: { access: "private" },
+    sounds: { access: "private" },
   },
   branch: (branch) => {
     if (branch.isDefault || branch.exists) {

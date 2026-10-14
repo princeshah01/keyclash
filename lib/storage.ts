@@ -13,3 +13,5 @@ export const AVATAR_TYPES = {
 export type AvatarType = keyof typeof AVATAR_TYPES;
 
 export const avatars = new Files({ adapter: neon({ bucket: "avatars" }) });
+
+export const sounds = new Files({ adapter: neon({ bucket: "sounds" }) });
