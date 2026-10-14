@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { getSessionUser } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { type Player, players, results } from "@/lib/db/schema";
+import { type Preferences, parsePreferences } from "@/lib/settings/options";
 import { cookieDefaults, HttpError, isUniqueViolation } from "./http";
 import { NAME_PATTERN, nameFromProfile, randomGuestName } from "./names";
 
@@ -16,6 +17,7 @@ type SessionUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
 
 export interface PublicPlayer {
   avatarUrl: string | null;
+  preferences: Preferences | null;
   email: string | null;
   id: string;
   isGuest: boolean;
@@ -39,6 +41,8 @@ export function toPublicPlayer(player: Player): PublicPlayer {
     isGuest: player.authUserId === null,
     email: player.email,
     avatarUrl: avatarUrlFor(player),
+    preferences:
+      player.authUserId && player.preferences ? parsePreferences(player.preferences) : null,
   };
 }
 
@@ -247,6 +251,18 @@ export async function setAvatarKey(player: Player, avatarKey: string | null) {
   const [updated] = await db
     .update(players)
     .set({ avatarKey })
+    .where(eq(players.id, player.id))
+    .returning();
+  return updated;
+}
+
+export async function savePreferences(player: Player, preferences: Preferences) {
+  if (!player.authUserId) {
+    throw new HttpError(403, "sign_in_required", "Sign in to sync preferences to your account");
+  }
+  const [updated] = await db
+    .update(players)
+    .set({ preferences })
     .where(eq(players.id, player.id))
     .returning();
   return updated;

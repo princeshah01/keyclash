@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import type { Preferences } from "../settings/options";
 import { DIFFICULTIES, TEST_MODES } from "../typing/options";
 import type { WpmSnapshot } from "../typing/types";
 
@@ -29,6 +30,7 @@ export const players = pgTable(
     email: text(),
     image: text(),
     avatarKey: text(),
+    preferences: jsonb().$type<Preferences>(),
     createdAt: createdAt(),
     updatedAt: timestamp({ withTimezone: true })
       .notNull()
