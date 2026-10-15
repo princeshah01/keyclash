@@ -24,9 +24,9 @@ const COOKIES = [
     purpose: "Remembers the choice you make here.",
   },
   {
-    name: "kc-test-options · kc-sound",
+    name: "kc-settings · kc-test-options",
     kind: "preferences",
-    purpose: "Remembers your test settings and keyboard sound between visits.",
+    purpose: "Remembers your theme, font, sound and test settings in this browser.",
   },
 ] as const;
 

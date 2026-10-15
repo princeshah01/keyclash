@@ -35,11 +35,6 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
     setConsentState(value);
     if (value === "essential") {
       clearStoredOptions();
-      try {
-        localStorage.removeItem("kc-sound");
-      } catch {
-        return;
-      }
     }
   }, []);
 

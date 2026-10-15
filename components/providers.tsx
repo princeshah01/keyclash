@@ -1,19 +1,19 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { ConsentProvider } from "@/components/consent/consent-provider";
 import { ChromeProvider } from "@/components/layout/chrome-provider";
 import { PlayerProvider } from "@/components/player/player-provider";
+import { SettingsProvider } from "@/components/settings/settings-provider";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange enableSystem>
-      <ConsentProvider>
-        <PlayerProvider>
+    <ConsentProvider>
+      <PlayerProvider>
+        <SettingsProvider>
           <ChromeProvider>{children}</ChromeProvider>
-        </PlayerProvider>
-      </ConsentProvider>
-    </ThemeProvider>
+        </SettingsProvider>
+      </PlayerProvider>
+    </ConsentProvider>
   );
 }

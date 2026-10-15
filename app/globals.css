@@ -34,7 +34,15 @@
   --subtle: oklch(0.7 0.01 60);
   --faint: oklch(0.82 0.008 60);
   --primary: oklch(0.6 0.105 172);
-  --primary-soft: oklch(0.6 0.105 172 / 0.2);
+  --primary-soft: color-mix(in oklch, var(--primary) 20%, transparent);
+  --page: color-mix(in oklch, var(--primary) 3%, var(--background));
+  --typing-font: var(--font-geist-mono);
+  --sw-light: #f4f1ea;
+  --sw-dark: #2f3a4c;
+  --sw-accent: #dcc19a;
+  --ink-light: oklch(0.42 0.015 260);
+  --ink-dark: oklch(0.9 0.01 262);
+  --ink-accent: oklch(0.38 0.05 60);
   --primary-foreground: oklch(0.99 0.005 172);
   --danger: oklch(0.6 0.19 25);
   --border: oklch(0.3 0.01 50 / 0.08);
@@ -54,7 +62,8 @@
   --subtle: oklch(0.52 0.012 190);
   --faint: oklch(0.38 0.012 190);
   --primary: oklch(0.78 0.11 172);
-  --primary-soft: oklch(0.78 0.11 172 / 0.15);
+  --primary-soft: color-mix(in oklch, var(--primary) 15%, transparent);
+  --page: color-mix(in oklch, var(--primary) 4%, var(--background));
   --primary-foreground: oklch(0.2 0.03 180);
   --danger: oklch(0.7 0.17 25);
   --border: oklch(1 0 0 / 0.08);
@@ -64,17 +73,119 @@
   color-scheme: dark;
 }
 
+:root[data-accent="classic"] {
+  --primary: oklch(0.63 0.19 42);
+  --sw-light: #f5f5f5;
+  --sw-dark: #737373;
+  --sw-accent: #f57644;
+  --ink-light: oklch(0.4 0 0);
+  --ink-dark: oklch(0.97 0 0);
+  --ink-accent: oklch(0.99 0 0);
+}
+:root.dark[data-accent="classic"] {
+  --primary: oklch(0.74 0.17 45);
+}
+
+:root[data-accent="mint"] {
+  --primary: oklch(0.57 0.1 190);
+  --sw-light: #eeeeee;
+  --sw-dark: #447b82;
+  --sw-accent: #86c8ac;
+  --ink-light: oklch(0.42 0.04 200);
+  --ink-dark: oklch(0.97 0.01 190);
+  --ink-accent: oklch(0.32 0.05 165);
+}
+:root.dark[data-accent="mint"] {
+  --primary: oklch(0.78 0.1 165);
+}
+
+:root[data-accent="royal"] {
+  --primary: oklch(0.55 0.12 95);
+  --sw-light: #324974;
+  --sw-dark: #3a3b35;
+  --sw-accent: #e4d440;
+  --ink-light: oklch(0.93 0.02 260);
+  --ink-dark: oklch(0.9 0.03 100);
+  --ink-accent: oklch(0.32 0.06 100);
+}
+:root.dark[data-accent="royal"] {
+  --primary: oklch(0.86 0.16 98);
+}
+
+:root[data-accent="dolch"] {
+  --primary: oklch(0.57 0.2 25);
+  --sw-light: #4f5e78;
+  --sw-dark: #3e3b4c;
+  --sw-accent: #d73e42;
+  --ink-light: oklch(0.93 0.02 260);
+  --ink-dark: oklch(0.88 0.03 290);
+  --ink-accent: oklch(0.98 0.01 25);
+}
+:root.dark[data-accent="dolch"] {
+  --primary: oklch(0.68 0.19 25);
+}
+
+:root[data-accent="sand"] {
+  --primary: oklch(0.56 0.16 30);
+  --sw-light: #efefef;
+  --sw-dark: #893d36;
+  --sw-accent: #c94e41;
+  --ink-light: oklch(0.4 0.06 30);
+  --ink-dark: oklch(0.95 0.02 30);
+  --ink-accent: oklch(0.98 0.01 30);
+}
+:root.dark[data-accent="sand"] {
+  --primary: oklch(0.71 0.15 32);
+}
+
+:root[data-accent="scarlet"] {
+  --primary: oklch(0.6 0.13 10);
+  --sw-light: #e4d7d7;
+  --sw-dark: #d5868a;
+  --sw-accent: #e1e1e1;
+  --ink-light: oklch(0.45 0.06 10);
+  --ink-dark: oklch(0.99 0.01 10);
+  --ink-accent: oklch(0.5 0.06 10);
+}
+:root.dark[data-accent="scarlet"] {
+  --primary: oklch(0.76 0.11 10);
+}
+
+:root[data-font="jetbrains-mono"] {
+  --typing-font: var(--font-jetbrains-mono);
+}
+:root[data-font="fira-code"] {
+  --typing-font: var(--font-fira-code);
+}
+:root[data-font="ibm-plex-mono"] {
+  --typing-font: var(--font-ibm-plex-mono);
+}
+:root[data-font="source-code-pro"] {
+  --typing-font: var(--font-source-code-pro);
+}
+:root[data-font="space-mono"] {
+  --typing-font: var(--font-space-mono);
+}
+:root[data-font="roboto-mono"] {
+  --typing-font: var(--font-roboto-mono);
+}
+:root[data-font="lexend"] {
+  --typing-font: var(--font-lexend);
+}
+
 @layer base {
   * {
     @apply border-border;
   }
 
   html {
-    @apply bg-background font-sans text-foreground antialiased;
+    @apply font-sans text-foreground antialiased;
+    background-color: var(--page);
   }
 
   body {
-    @apply min-h-dvh bg-background;
+    @apply min-h-dvh;
+    background-color: var(--page);
   }
 
   ::selection {
@@ -115,22 +226,22 @@
   --kb-case-shade: oklch(0.9 0.006 85);
   --kb-plate: oklch(0.9 0.006 85);
   --kb-brand: oklch(0.7 0.01 85);
-  --alpha-face: oklch(0.965 0.008 90);
-  --alpha-side: oklch(0.88 0.012 90);
-  --alpha-edge: oklch(0.8 0.014 90);
-  --alpha-ink: oklch(0.42 0.015 260);
-  --mod-face: oklch(0.35 0.035 262);
-  --mod-side: oklch(0.29 0.033 262);
-  --mod-edge: oklch(0.22 0.03 262);
-  --mod-ink: oklch(0.9 0.01 262);
-  --accent-face: oklch(0.83 0.065 75);
-  --accent-side: oklch(0.74 0.07 70);
-  --accent-edge: oklch(0.64 0.07 65);
-  --accent-ink: oklch(0.38 0.05 60);
-  --lcd-top: oklch(0.84 0.1 225);
-  --lcd-bottom: oklch(0.68 0.13 235);
+  --alpha-face: var(--sw-light);
+  --alpha-side: color-mix(in oklch, var(--sw-light) 88%, black);
+  --alpha-edge: color-mix(in oklch, var(--sw-light) 76%, black);
+  --alpha-ink: var(--ink-light);
+  --mod-face: var(--sw-dark);
+  --mod-side: color-mix(in oklch, var(--sw-dark) 84%, black);
+  --mod-edge: color-mix(in oklch, var(--sw-dark) 66%, black);
+  --mod-ink: var(--ink-dark);
+  --accent-face: var(--sw-accent);
+  --accent-side: color-mix(in oklch, var(--sw-accent) 86%, black);
+  --accent-edge: color-mix(in oklch, var(--sw-accent) 72%, black);
+  --accent-ink: var(--ink-accent);
+  --lcd-top: color-mix(in oklch, var(--primary) 55%, white);
+  --lcd-bottom: var(--primary);
   --lcd-ink: oklch(0.99 0.01 230);
-  --lcd-shadow: oklch(0.42 0.1 245);
+  --lcd-shadow: color-mix(in oklch, var(--primary) 60%, black);
   position: relative;
   padding: calc(var(--u) * 0.45);
   border-radius: calc(var(--u) * 0.5);
@@ -151,15 +262,16 @@
   --kb-case-shade: oklch(0.25 0.008 240);
   --kb-plate: oklch(0.17 0.006 240);
   --kb-brand: oklch(0.55 0.01 240);
-  --alpha-face: oklch(0.88 0.01 90);
-  --alpha-side: oklch(0.76 0.012 90);
-  --alpha-edge: oklch(0.6 0.012 90);
-  --mod-face: oklch(0.4 0.04 262);
-  --mod-side: oklch(0.32 0.036 262);
-  --mod-edge: oklch(0.24 0.03 262);
-  --accent-face: oklch(0.78 0.07 75);
-  --accent-side: oklch(0.67 0.07 70);
-  --accent-edge: oklch(0.55 0.07 65);
+  --alpha-face: color-mix(in oklch, var(--sw-light) 90%, black);
+  --alpha-side: color-mix(in oklch, var(--sw-light) 78%, black);
+  --alpha-edge: color-mix(in oklch, var(--sw-light) 62%, black);
+  --mod-face: color-mix(in oklch, var(--sw-dark) 88%, white);
+}
+
+:root[data-accent="keyclash"] .kb {
+  --lcd-top: oklch(0.84 0.1 225);
+  --lcd-bottom: oklch(0.68 0.13 235);
+  --lcd-shadow: oklch(0.42 0.1 245);
 }
 
 .kb-plate {
