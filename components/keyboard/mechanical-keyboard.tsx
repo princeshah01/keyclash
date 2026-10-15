@@ -19,7 +19,8 @@ import {
 } from "react";
 import { LcdDisplay, type LcdState } from "@/components/keyboard/lcd-display";
 import { DISPLAY, KEY_BY_CODE, KEYS, type KeyDef, type KeyIcon } from "@/lib/keyboard/layout";
-import { playKeySound } from "@/lib/keyboard/sound";
+import { playKeySound, preloadPack } from "@/lib/keyboard/sound";
+import type { SoundPackId } from "@/lib/settings/options";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<KeyIcon, Icon> = {
@@ -121,27 +122,31 @@ const KeyField = memo(function KeyField(props: Omit<KeyProps, "keyDef">) {
   return KEYS.map((keyDef) => <Key key={keyDef.code} keyDef={keyDef} {...props} />);
 });
 
+interface KeyboardSound {
+  enabled: boolean;
+  pack: SoundPackId;
+  volume: number;
+}
+
 interface MechanicalKeyboardProps {
   className?: string;
   lcd: LcdState;
-  soundEnabled: boolean;
-  volume?: number;
+  sound: KeyboardSound;
 }
 
-export function MechanicalKeyboard({
-  className,
-  lcd,
-  soundEnabled,
-  volume = 0.55,
-}: MechanicalKeyboardProps) {
+export function MechanicalKeyboard({ className, lcd, sound }: MechanicalKeyboardProps) {
   const nodesRef = useRef(new Map<string, HTMLElement>());
   const heldRef = useRef(new Set<string>());
-  const audioRef = useRef({ enabled: soundEnabled, volume });
+  const audioRef = useRef(sound);
   const [taps, setTaps] = useState(0);
+  const { enabled, pack, volume } = sound;
 
   useEffect(() => {
-    audioRef.current = { enabled: soundEnabled, volume };
-  }, [soundEnabled, volume]);
+    audioRef.current = { enabled, pack, volume };
+    if (enabled) {
+      void preloadPack(pack);
+    }
+  }, [enabled, pack, volume]);
 
   const register = useCallback<Register>((code, node) => {
     if (node) {
@@ -159,7 +164,7 @@ export function MechanicalKeyboard({
     heldRef.current.add(code);
     nodesRef.current.get(code)?.setAttribute("data-pressed", "");
     if (audioRef.current.enabled) {
-      playKeySound(keyDef.sound, "down", audioRef.current.volume);
+      playKeySound(audioRef.current.pack, keyDef.sound, "down", audioRef.current.volume);
     }
     setTaps((count) => count + 1);
   }, []);
@@ -171,7 +176,7 @@ export function MechanicalKeyboard({
     nodesRef.current.get(code)?.removeAttribute("data-pressed");
     const keyDef = KEY_BY_CODE.get(code);
     if (keyDef && audioRef.current.enabled) {
-      playKeySound(keyDef.sound, "up", audioRef.current.volume);
+      playKeySound(audioRef.current.pack, keyDef.sound, "up", audioRef.current.volume);
     }
   }, []);
 

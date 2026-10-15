@@ -1,3 +1,13 @@
+import type { SoundPackId } from "@/lib/settings/options";
+import {
+  type Effect,
+  effectKey,
+  PACK_SAMPLES,
+  type PackSample,
+  packKey,
+  type RemotePack,
+  soundUrl,
+} from "@/lib/sounds/catalog";
 import type { SoundProfile } from "./layout";
 
 interface Voice {
@@ -14,8 +24,14 @@ const VOICES: Record<SoundProfile, Voice> = {
   space: { thock: 105, thockGain: 0.75, click: 1700, clickGain: 0.26 },
 };
 
+const ALPHA_SAMPLES = ["down-1", "down-2", "down-3"] as const;
+
 let context: AudioContext | null = null;
 let noise: AudioBuffer | null = null;
+let decoder: OfflineAudioContext | null = null;
+const buffers = new Map<string, Promise<AudioBuffer | null>>();
+const decoded = new Map<string, AudioBuffer>();
+let effectSource: AudioBufferSourceNode | null = null;
 
 function jitter(value: number, amount: number) {
   return value * (1 + (Math.random() * 2 - 1) * amount);
@@ -37,6 +53,42 @@ function ensureContext() {
     void context.resume();
   }
   return context;
+}
+
+function loadBuffer(key: string) {
+  const existing = buffers.get(key);
+  if (existing) {
+    return existing;
+  }
+  decoder ??= new OfflineAudioContext(1, 1, 44_100);
+  const pending = fetch(soundUrl(key))
+    .then((response) => (response.ok ? response.arrayBuffer() : Promise.reject(response.status)))
+    .then((bytes) => decoder?.decodeAudioData(bytes) ?? null)
+    .then((buffer) => {
+      if (buffer) {
+        decoded.set(key, buffer);
+      }
+      return buffer;
+    })
+    .catch(() => {
+      buffers.delete(key);
+      return null;
+    });
+  buffers.set(key, pending);
+  return pending;
+}
+
+export function preloadPack(pack: SoundPackId) {
+  if (pack === "synth") {
+    return Promise.resolve();
+  }
+  return Promise.all(PACK_SAMPLES.map((sample) => loadBuffer(packKey(pack, sample)))).then(
+    () => undefined,
+  );
+}
+
+export function preloadEffect(effect: Effect) {
+  return loadBuffer(effectKey(effect)).then(() => undefined);
 }
 
 function envelope(ctx: AudioContext, peak: number, attack: number, decay: number) {
@@ -73,20 +125,17 @@ function noiseBurst(
   source.stop(ctx.currentTime + decay + 0.05);
 }
 
-export function playKeySound(profile: SoundProfile, phase: "down" | "up", volume: number) {
-  const ctx = ensureContext();
-  if (!ctx || volume <= 0) {
-    return;
-  }
+function playSynth(
+  ctx: AudioContext,
+  output: AudioNode,
+  profile: SoundProfile,
+  phase: "down" | "up",
+) {
   const voice = VOICES[profile];
-  const master = ctx.createGain();
-  master.gain.value = volume;
-  master.connect(ctx.destination);
-
   if (phase === "up") {
     noiseBurst(
       ctx,
-      master,
+      output,
       "bandpass",
       jitter(voice.click * 0.8, 0.12),
       1.4,
@@ -95,7 +144,6 @@ export function playKeySound(profile: SoundProfile, phase: "down" | "up", volume
     );
     return;
   }
-
   const now = ctx.currentTime;
   const body = ctx.createOscillator();
   body.type = "sine";
@@ -103,18 +151,97 @@ export function playKeySound(profile: SoundProfile, phase: "down" | "up", volume
   body.frequency.setValueAtTime(pitch, now);
   body.frequency.exponentialRampToValueAtTime(pitch * 0.55, now + 0.07);
   const bodyGain = envelope(ctx, jitter(voice.thockGain, 0.1), 0.003, 0.09);
-  body.connect(bodyGain).connect(master);
+  body.connect(bodyGain).connect(output);
   body.start(now);
   body.stop(now + 0.15);
-
   noiseBurst(
     ctx,
-    master,
+    output,
     "bandpass",
     jitter(voice.click, 0.12),
     1.1,
     jitter(voice.clickGain, 0.15),
     0.028,
   );
-  noiseBurst(ctx, master, "lowpass", jitter(900, 0.1), 0.7, voice.thockGain * 0.35, 0.06);
+  noiseBurst(ctx, output, "lowpass", jitter(900, 0.1), 0.7, voice.thockGain * 0.35, 0.06);
+}
+
+function sampleFor(profile: SoundProfile, phase: "down" | "up"): PackSample {
+  if (phase === "up") {
+    return "up";
+  }
+  if (profile === "alpha") {
+    return ALPHA_SAMPLES[Math.floor(Math.random() * ALPHA_SAMPLES.length)];
+  }
+  return profile;
+}
+
+function playBuffer(ctx: AudioContext, output: AudioNode, buffer: AudioBuffer, rate: number) {
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.playbackRate.value = rate;
+  source.connect(output);
+  source.start();
+  return source;
+}
+
+function masterGain(ctx: AudioContext, volume: number) {
+  const gain = ctx.createGain();
+  gain.gain.value = volume;
+  gain.connect(ctx.destination);
+  return gain;
+}
+
+export function playKeySound(
+  pack: SoundPackId,
+  profile: SoundProfile,
+  phase: "down" | "up",
+  volume: number,
+) {
+  const ctx = ensureContext();
+  if (!ctx || volume <= 0) {
+    return;
+  }
+  const output = masterGain(ctx, volume);
+  if (pack !== "synth") {
+    const key = packKey(pack as RemotePack, sampleFor(profile, phase));
+    const buffer = decoded.get(key);
+    if (buffer) {
+      playBuffer(ctx, output, buffer, jitter(1, 0.03));
+      return;
+    }
+    void loadBuffer(key);
+  }
+  playSynth(ctx, output, profile, phase);
+}
+
+export function playEffect(effect: Effect, volume: number) {
+  const ctx = ensureContext();
+  const buffer = decoded.get(effectKey(effect));
+  if (!ctx || volume <= 0) {
+    return;
+  }
+  if (!buffer) {
+    void loadBuffer(effectKey(effect));
+    return;
+  }
+  effectSource?.stop();
+  effectSource = playBuffer(ctx, masterGain(ctx, volume), buffer, 1);
+}
+
+export function previewPack(pack: SoundPackId, volume: number) {
+  void preloadPack(pack).then(() => {
+    const sequence: [SoundProfile, number][] = [
+      ["alpha", 0],
+      ["alpha", 110],
+      ["alpha", 200],
+      ["space", 330],
+      ["alpha", 460],
+      ["enter", 600],
+    ];
+    for (const [profile, delay] of sequence) {
+      setTimeout(() => playKeySound(pack, profile, "down", volume), delay);
+      setTimeout(() => playKeySound(pack, profile, "up", volume), delay + 70);
+    }
+  });
 }

@@ -27,6 +27,7 @@ const RESET_FADE_MS = 150;
 
 interface UseTypingTestProps {
   onActiveChange?: (active: boolean) => void;
+  onMistake?: () => void;
 }
 
 function wordCountFor(options: TestOptions) {
@@ -55,7 +56,7 @@ function countWordErrors(input: string, target: string) {
   return errors;
 }
 
-export function useTypingTest({ onActiveChange }: UseTypingTestProps = {}) {
+export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps = {}) {
   const [options, setOptions] = useState<TestOptions>(DEFAULT_OPTIONS);
   const [words, setWords] = useState<string[]>([]);
   const [quoteAuthor, setQuoteAuthor] = useState<string | null>(null);
@@ -93,7 +94,9 @@ export function useTypingTest({ onActiveChange }: UseTypingTestProps = {}) {
   const finishRef = useRef<() => void>(() => undefined);
   const frozenRef = useRef<ResultStats | null>(null);
 
+  const onMistakeRef = useRef(onMistake);
   onActiveChangeRef.current = onActiveChange;
+  onMistakeRef.current = onMistake;
 
   const counts = countChars({
     targetWords: words,
@@ -424,6 +427,9 @@ export function useTypingTest({ onActiveChange }: UseTypingTestProps = {}) {
       allTypedRef.current += 1;
       const nextTyped = typed + key;
       setTyped(nextTyped);
+      if (typed.length >= target.length || key !== target[typed.length]) {
+        onMistakeRef.current?.();
+      }
 
       const isLastWord = wordIndex + 1 >= words.length;
       if (isLastWord && !isOpenEnded(options) && nextTyped.length >= target.length) {
