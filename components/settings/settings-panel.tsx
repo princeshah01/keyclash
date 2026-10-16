@@ -13,20 +13,27 @@ import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { ModeSwitcher, Switch, VolumeSlider } from "@/components/settings/controls";
 import { FontList } from "@/components/settings/font-list";
+import { MistakeSoundList } from "@/components/settings/mistake-sound-list";
 import { type SettingsStorage, useSettings } from "@/components/settings/settings-provider";
 import { SoundPackList } from "@/components/settings/sound-pack-list";
 import { ThemeGrid, ThemeSwatch } from "@/components/settings/theme-grid";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { playEffect, preloadEffect } from "@/lib/keyboard/sound";
-import { FONT_OPTIONS, SOUND_PACK_OPTIONS, THEME_OPTIONS } from "@/lib/settings/options";
+import { previewMistake } from "@/lib/keyboard/sound";
+import {
+  FONT_OPTIONS,
+  MISTAKE_SOUND_OPTIONS,
+  SOUND_PACK_OPTIONS,
+  THEME_OPTIONS,
+} from "@/lib/settings/options";
 
-type Page = "main" | "themes" | "fonts" | "sounds";
+type Page = "main" | "themes" | "fonts" | "sounds" | "mistakes";
 
 const TITLES: Record<Page, string> = {
   main: "Settings",
   themes: "Themes",
   fonts: "Font",
   sounds: "Sound pack",
+  mistakes: "Mistake sound",
 };
 
 const STORAGE_COPY: Record<SettingsStorage, { icon: typeof Info; text: string }> = {
@@ -87,12 +94,13 @@ function MainPage({ onNavigate }: { onNavigate: (page: Page) => void }) {
   const theme = THEME_OPTIONS.find((option) => option.id === preferences.accent);
   const font = FONT_OPTIONS.find((option) => option.id === preferences.font);
   const pack = SOUND_PACK_OPTIONS.find((option) => option.id === preferences.soundPack);
+  const mistake = MISTAKE_SOUND_OPTIONS.find((option) => option.id === preferences.mistakeSound);
   const audioOff = !preferences.soundEnabled;
 
   const toggleFaah = (enabled: boolean) => {
     update({ faahMode: enabled });
     if (enabled && preferences.soundEnabled) {
-      void preloadEffect("faah").then(() => playEffect("faah", preferences.volume));
+      previewMistake(preferences.mistakeSound, preferences.volume);
     }
   };
 
@@ -143,7 +151,7 @@ function MainPage({ onNavigate }: { onNavigate: (page: Page) => void }) {
           onOpen={() => onNavigate("sounds")}
           preview={<span className="text-[11px]">{pack?.label}</span>}
         />
-        <Row hint="Plays a dramatic faah on every mistake" label="Faah mode">
+        <Row hint="Plays a sound on every mistake" label="Faah mode">
           <Switch
             checked={preferences.faahMode}
             disabled={audioOff}
@@ -151,6 +159,11 @@ function MainPage({ onNavigate }: { onNavigate: (page: Page) => void }) {
             onChange={toggleFaah}
           />
         </Row>
+        <SubpageRow
+          label="Mistake sound"
+          onOpen={() => onNavigate("mistakes")}
+          preview={<span className="text-[11px]">{mistake?.label}</span>}
+        />
       </Section>
 
       <Section title="Gameplay">
@@ -180,6 +193,15 @@ function SubPage({ page }: { page: Exclude<Page, "main"> }) {
   }
   if (page === "fonts") {
     return <FontList active={preferences.font} onSelect={(font) => update({ font })} />;
+  }
+  if (page === "mistakes") {
+    return (
+      <MistakeSoundList
+        active={preferences.mistakeSound}
+        onSelect={(mistakeSound) => update({ mistakeSound })}
+        volume={preferences.soundEnabled ? preferences.volume : 0}
+      />
+    );
   }
   return (
     <SoundPackList

@@ -1,7 +1,6 @@
-import type { SoundPackId } from "@/lib/settings/options";
+import type { MistakeSoundId, SoundPackId } from "@/lib/settings/options";
 import {
-  type Effect,
-  effectKey,
+  mistakeKey,
   PACK_SAMPLES,
   type PackSample,
   packKey,
@@ -31,7 +30,7 @@ let noise: AudioBuffer | null = null;
 let decoder: OfflineAudioContext | null = null;
 const buffers = new Map<string, Promise<AudioBuffer | null>>();
 const decoded = new Map<string, AudioBuffer>();
-let effectSource: AudioBufferSourceNode | null = null;
+let mistakeSource: AudioBufferSourceNode | null = null;
 
 function jitter(value: number, amount: number) {
   return value * (1 + (Math.random() * 2 - 1) * amount);
@@ -87,8 +86,8 @@ export function preloadPack(pack: SoundPackId) {
   );
 }
 
-export function preloadEffect(effect: Effect) {
-  return loadBuffer(effectKey(effect)).then(() => undefined);
+export function preloadMistake(sound: MistakeSoundId) {
+  return loadBuffer(mistakeKey(sound)).then(() => undefined);
 }
 
 function envelope(ctx: AudioContext, peak: number, attack: number, decay: number) {
@@ -215,18 +214,22 @@ export function playKeySound(
   playSynth(ctx, output, profile, phase);
 }
 
-export function playEffect(effect: Effect, volume: number) {
+export function playMistake(sound: MistakeSoundId, volume: number) {
   const ctx = ensureContext();
-  const buffer = decoded.get(effectKey(effect));
+  const buffer = decoded.get(mistakeKey(sound));
   if (!ctx || volume <= 0) {
     return;
   }
   if (!buffer) {
-    void loadBuffer(effectKey(effect));
+    void loadBuffer(mistakeKey(sound));
     return;
   }
-  effectSource?.stop();
-  effectSource = playBuffer(ctx, masterGain(ctx, volume), buffer, 1);
+  mistakeSource?.stop();
+  mistakeSource = playBuffer(ctx, masterGain(ctx, volume), buffer, 1);
+}
+
+export function previewMistake(sound: MistakeSoundId, volume: number) {
+  void preloadMistake(sound).then(() => playMistake(sound, volume));
 }
 
 export function previewPack(pack: SoundPackId, volume: number) {

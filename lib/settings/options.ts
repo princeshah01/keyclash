@@ -22,11 +22,22 @@ export const FONTS = [
   "lexend",
 ] as const;
 export const SOUND_PACKS = ["synth", "creamy", "clicky", "typewriter", "bubble"] as const;
+export const MISTAKE_SOUNDS = [
+  "faaah",
+  "chalo",
+  "fart",
+  "punch",
+  "aayein",
+  "rizz",
+  "anime-ahh",
+  "gunshot",
+] as const;
 
 export type ColorMode = (typeof MODES)[number];
 export type Accent = (typeof ACCENTS)[number];
 export type FontId = (typeof FONTS)[number];
 export type SoundPackId = (typeof SOUND_PACKS)[number];
+export type MistakeSoundId = (typeof MISTAKE_SOUNDS)[number];
 
 export interface ThemeOption {
   colors: [light: string, dark: string, accent: string];
@@ -69,6 +80,17 @@ export const SOUND_PACK_OPTIONS: readonly {
   { id: "bubble", label: "Bubble", description: "Soft popping keys", remote: true },
 ];
 
+export const MISTAKE_SOUND_OPTIONS: readonly { id: MistakeSoundId; label: string }[] = [
+  { id: "faaah", label: "Faaah" },
+  { id: "chalo", label: "Chalo" },
+  { id: "fart", label: "Fart" },
+  { id: "punch", label: "Punch" },
+  { id: "aayein", label: "Aayein" },
+  { id: "rizz", label: "Rizz" },
+  { id: "anime-ahh", label: "Anime ahh" },
+  { id: "gunshot", label: "Gunshot" },
+];
+
 export const preferencesSchema = z.object({
   mode: z.enum(MODES),
   accent: z.enum(ACCENTS),
@@ -77,6 +99,7 @@ export const preferencesSchema = z.object({
   soundPack: z.enum(SOUND_PACKS),
   volume: z.number().min(0).max(1),
   faahMode: z.boolean(),
+  mistakeSound: z.enum(MISTAKE_SOUNDS),
   showKeyboard: z.boolean(),
   liveStats: z.boolean(),
 });
@@ -91,6 +114,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   soundPack: "synth",
   volume: 0.6,
   faahMode: false,
+  mistakeSound: "faaah",
   showKeyboard: true,
   liveStats: true,
 };

@@ -1,6 +1,6 @@
 ---
 name: frontend-settings
-description: How keyclash's settings drawer is structured - SettingsButton entry with Ctrl/⌘+K, SettingsPanel sections and subpages, the SettingsProvider that applies appearance and persists preferences (localStorage for guests, Neon Postgres for signed-in players), multi-theme CSS via data-accent, the app-wide font via data-font, sound packs in Neon Object Storage, and how to add a new setting, theme, font or sound pack. Use when changing the header Audio/Settings buttons, the settings panel, appearance, themes, accents, fonts, sounds, faah mode, show keyboard, live stats, or anything under components/settings or lib/settings.
+description: How keyclash's settings drawer is structured - SettingsButton entry with Ctrl/⌘+K, SettingsPanel sections and subpages, the SettingsProvider that applies appearance and persists preferences (localStorage for guests, Neon Postgres for signed-in players), multi-theme CSS via data-accent, the app-wide font via data-font, sound packs in Neon Object Storage, and how to add a new setting, theme, font or sound pack. Use when changing the header Audio/Settings buttons, the settings panel, appearance, themes, accents, fonts, sounds, faah mode, mistake sounds, show keyboard, live stats, or anything under components/settings or lib/settings.
 ---
 
 # Frontend settings (keyclash)
@@ -33,7 +33,8 @@ interface Preferences {
   soundEnabled: boolean;   // master audio (header Audio button)
   soundPack: SoundPackId;  // "synth" | remote packs
   volume: number;          // 0..1
-  faahMode: boolean;       // faah on mistakes, only when soundEnabled
+  faahMode: boolean;       // play mistakeSound on every wrong key, only when soundEnabled
+  mistakeSound: MistakeSoundId; // "faaah" (default) | "chalo" | "fart" | … — clip played on mistakes
   showKeyboard: boolean;
   liveStats: boolean;      // wpm + accuracy while typing
 }
@@ -96,7 +97,7 @@ Themes are named accents on `<html data-accent>`; light/dark is `class="dark"`. 
 
 ## Sounds
 
-Keyboard sound packs and the faah effect are WAVs in the Neon `sounds` bucket, rendered by `scripts/generate-sounds.mts`. Full recipe: [sounds.md](sounds.md).
+Keyboard sound packs are WAVs rendered by `scripts/generate-sounds.mts`; mistake sounds are MP3 clips uploaded by `scripts/upload-mistake-sounds.mts`. Both live in the Neon `sounds` bucket. Full recipe: [sounds.md](sounds.md).
 
 ## Rules of thumb
 
@@ -104,7 +105,7 @@ Keyboard sound packs and the faah effect are WAVs in the Neon `sounds` bucket, r
 - Pickers stay presentational; persistence stays in the provider.
 - The panel is `role="dialog"`. The typing test skips refocusing its hidden input while any dialog is open, so keep that role.
 - Use tokens (`bg-primary`, `text-muted`, `var(--primary)`), never hard-coded theme colors in components.
-- `soundEnabled` is the master switch. Faah and keyboard sounds both check it.
+- `soundEnabled` is the master switch. Mistake sounds and keyboard sounds both check it.
 
 ## Checklist
 

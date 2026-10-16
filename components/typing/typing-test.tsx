@@ -10,7 +10,7 @@ import { ResultsScreen } from "@/components/typing/results-screen";
 import { TestToolbar } from "@/components/typing/test-toolbar";
 import { WordItem } from "@/components/typing/word-item";
 import { useTypingTest } from "@/hooks/use-typing-test";
-import { playEffect, preloadEffect } from "@/lib/keyboard/sound";
+import { playMistake, preloadMistake } from "@/lib/keyboard/sound";
 import { modeDetailOf } from "@/lib/typing/options";
 import { cn } from "@/lib/utils";
 
@@ -70,12 +70,12 @@ export function TypingTest() {
   const { setTypingActive } = useChrome();
   const { preferences } = useSettings();
   const faahActive = preferences.faahMode && preferences.soundEnabled;
-  const volume = preferences.volume;
+  const { mistakeSound, volume } = preferences;
   const handleMistake = useCallback(() => {
     if (faahActive) {
-      playEffect("faah", volume);
+      playMistake(mistakeSound, volume);
     }
-  }, [faahActive, volume]);
+  }, [faahActive, mistakeSound, volume]);
   const test = useTypingTest({ onActiveChange: setTypingActive, onMistake: handleMistake });
   const {
     options,
@@ -102,9 +102,9 @@ export function TypingTest() {
 
   useEffect(() => {
     if (faahActive) {
-      void preloadEffect("faah");
+      void preloadMistake(mistakeSound);
     }
-  }, [faahActive]);
+  }, [faahActive, mistakeSound]);
 
   useEffect(() => {
     if (focused || results) {

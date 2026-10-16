@@ -1,5 +1,5 @@
 import { handleError, json } from "@/lib/server/http";
-import { SOUND_KEYS } from "@/lib/sounds/catalog";
+import { SOUND_CONTENT_TYPES, SOUND_KEYS } from "@/lib/sounds/catalog";
 import { sounds } from "@/lib/storage";
 
 export async function GET(_request: Request, ctx: RouteContext<"/api/sounds/[...path]">) {
@@ -11,7 +11,8 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/sounds/[...
     const file = await sounds.download(key);
     return new Response(await file.arrayBuffer(), {
       headers: {
-        "Content-Type": "audio/wav",
+        "Content-Type":
+          SOUND_CONTENT_TYPES[key.split(".").at(-1) ?? ""] ?? "application/octet-stream",
         "Cache-Control": "public, max-age=86400, s-maxage=31536000, stale-while-revalidate=604800",
       },
     });

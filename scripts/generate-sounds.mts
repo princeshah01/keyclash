@@ -2,9 +2,6 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { config } from "dotenv";
 import {
-  EFFECTS,
-  type Effect,
-  effectKey,
   PACK_SAMPLES,
   type PackSample,
   packKey,
@@ -244,65 +241,12 @@ function bubble(sample: PackSample, seed: number) {
   return track.master();
 }
 
-function faah() {
-  const seconds = 1.25;
-  const length = Math.ceil(seconds * RATE);
-  const rand = random(7);
-  const fricative = new Float32Array(length);
-  const voice = new Float32Array(length);
-  const onset = 0.16;
-  let phase = 0;
-
-  for (let i = 0; i < length; i++) {
-    const t = i / RATE;
-    fricative[i] = rand() * 2 - 1;
-    if (t < onset - 0.03) {
-      continue;
-    }
-    const v = t - (onset - 0.03);
-    const fall = Math.min(v / (seconds - onset), 1);
-    const pitch = 225 * (1 - 0.42 * fall ** 1.6) * (1 + 0.025 * Math.sin(2 * Math.PI * 5.2 * v));
-    phase += (2 * Math.PI * pitch) / RATE;
-    let saw = 0;
-    const harmonics = Math.min(40, Math.floor(5000 / pitch));
-    for (let k = 1; k <= harmonics; k++) {
-      saw += Math.sin(k * phase) / k;
-    }
-    const attack = Math.min(v / 0.05, 1);
-    const release = Math.min(1, (seconds - t) / 0.45);
-    voice[i] = (saw * 0.6 + (rand() * 2 - 1) * 0.12) * attack * release ** 1.5;
-  }
-
-  const hiss = biquad(biquad(fricative, "highpass", 1800, 0.7), "bandpass", 4800, 0.9);
-  const formants = (
-    [
-      [760, 7, 1],
-      [1180, 9, 0.55],
-      [2550, 14, 0.22],
-    ] as const
-  ).map(([freq, q, gain]) => ({ out: biquad(voice, "bandpass", freq, q), gain }));
-
-  const out = new Float32Array(length);
-  for (let i = 0; i < length; i++) {
-    const t = i / RATE;
-    const f = t < 0.03 ? t / 0.03 : t < onset ? 1 : Math.max(0, 1 - (t - onset) / 0.05);
-    out[i] =
-      hiss[i] * f * 0.5 +
-      formants.reduce((sum, { out: band, gain }) => sum + band[i] * gain, 0) * 3.2;
-  }
-  const track = new Track(seconds, 1);
-  track.data.set(out);
-  return track.master(0.8);
-}
-
 const RENDERERS: Record<RemotePack, (sample: PackSample, seed: number) => Float32Array> = {
   creamy,
   clicky,
   typewriter,
   bubble,
 };
-
-const EFFECT_RENDERERS: Record<Effect, () => Float32Array> = { faah };
 
 function toWav(samples: Float32Array) {
   const buffer = Buffer.alloc(44 + samples.length * 2);
@@ -337,9 +281,6 @@ async function main() {
       ]);
     });
   });
-  for (const effect of EFFECTS) {
-    files.push([effectKey(effect), toWav(EFFECT_RENDERERS[effect]())]);
-  }
 
   if (outDir) {
     for (const [key, data] of files) {
