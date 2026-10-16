@@ -84,7 +84,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       className={cn(fontVariables)}
       data-accent="keyclash"
-      data-font="geist-mono"
+      data-font="space-grotesk"
       lang="en"
       suppressHydrationWarning
     >

@@ -206,7 +206,7 @@ export function TypingTest() {
 
         <label
           className={cn(
-            "relative block h-[8.3rem] w-full cursor-text overflow-hidden font-[family-name:var(--typing-font)] text-[1.65rem] leading-[2.6rem] sm:text-[1.8rem]",
+            "relative block h-[8.3rem] w-full cursor-text overflow-hidden font-mono text-[1.65rem] leading-[2.6rem] sm:text-[1.8rem]",
             typing && "is-typing",
           )}
         >

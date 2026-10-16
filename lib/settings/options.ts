@@ -11,6 +11,7 @@ export const ACCENTS = [
   "scarlet",
 ] as const;
 export const FONTS = [
+  "space-grotesk",
   "geist-mono",
   "jetbrains-mono",
   "fira-code",
@@ -44,6 +45,7 @@ export const THEME_OPTIONS: readonly ThemeOption[] = [
 ];
 
 export const FONT_OPTIONS: readonly { id: FontId; label: string; variable: string }[] = [
+  { id: "space-grotesk", label: "Space Grotesk", variable: "--font-grotesk" },
   { id: "geist-mono", label: "Geist Mono", variable: "--font-geist-mono" },
   { id: "jetbrains-mono", label: "JetBrains Mono", variable: "--font-jetbrains-mono" },
   { id: "fira-code", label: "Fira Code", variable: "--font-fira-code" },
@@ -84,7 +86,7 @@ export type Preferences = z.infer<typeof preferencesSchema>;
 export const DEFAULT_PREFERENCES: Preferences = {
   mode: "system",
   accent: "keyclash",
-  font: "geist-mono",
+  font: "space-grotesk",
   soundEnabled: true,
   soundPack: "synth",
   volume: 0.6,

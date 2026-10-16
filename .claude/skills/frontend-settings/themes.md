@@ -69,13 +69,20 @@ Pick ink colors for contrast against each swatch. Royal and Dolch have dark lett
 
 ## Fonts
 
-Same pattern with `data-font`:
+The font setting changes the **whole app**, not just the typing area. `data-font` sets one variable, `--app-font`, and both Tailwind families point at it in `@theme`:
+
+```css
+--font-sans: var(--app-font), ui-sans-serif, system-ui, sans-serif;
+--font-mono: var(--app-font), ui-monospace, monospace;
+```
+
+So `font-sans`, `font-mono`, the keyboard legends and the LCD all follow the choice. Default is Space Grotesk (`--font-grotesk`). Never reference a specific `--font-…` variable in components; use `font-sans` / `font-mono` or `var(--app-font)`.
+
+Adding a font:
 
 1. Load the font in `app/layout.tsx` with `next/font/google` as its own module-level `const` (Next rejects font loaders inside arrays). Give it a `variable`, add it to `fontVariables`.
 2. Add `{ id, label, variable }` to `FONT_OPTIONS` and the id to `FONTS`.
-3. Add `:root[data-font="id"] { --typing-font: var(--font-…); }` in `globals.css`.
-
-The typing area uses `font-[family-name:var(--typing-font)]`.
+3. Add `:root[data-font="id"] { --app-font: var(--font-…); }` in `globals.css`.
 
 ## Anti-patterns
 

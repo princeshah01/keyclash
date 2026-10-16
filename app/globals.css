@@ -3,8 +3,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--app-font), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--app-font), ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -36,7 +36,7 @@
   --primary: oklch(0.6 0.105 172);
   --primary-soft: color-mix(in oklch, var(--primary) 20%, transparent);
   --page: color-mix(in oklch, var(--primary) 3%, var(--background));
-  --typing-font: var(--font-geist-mono);
+  --app-font: var(--font-grotesk);
   --sw-light: #f4f1ea;
   --sw-dark: #2f3a4c;
   --sw-accent: #dcc19a;
@@ -151,26 +151,29 @@
   --primary: oklch(0.76 0.11 10);
 }
 
+:root[data-font="geist-mono"] {
+  --app-font: var(--font-geist-mono);
+}
 :root[data-font="jetbrains-mono"] {
-  --typing-font: var(--font-jetbrains-mono);
+  --app-font: var(--font-jetbrains-mono);
 }
 :root[data-font="fira-code"] {
-  --typing-font: var(--font-fira-code);
+  --app-font: var(--font-fira-code);
 }
 :root[data-font="ibm-plex-mono"] {
-  --typing-font: var(--font-ibm-plex-mono);
+  --app-font: var(--font-ibm-plex-mono);
 }
 :root[data-font="source-code-pro"] {
-  --typing-font: var(--font-source-code-pro);
+  --app-font: var(--font-source-code-pro);
 }
 :root[data-font="space-mono"] {
-  --typing-font: var(--font-space-mono);
+  --app-font: var(--font-space-mono);
 }
 :root[data-font="roboto-mono"] {
-  --typing-font: var(--font-roboto-mono);
+  --app-font: var(--font-roboto-mono);
 }
 :root[data-font="lexend"] {
-  --typing-font: var(--font-lexend);
+  --app-font: var(--font-lexend);
 }
 
 @layer base {
@@ -348,7 +351,7 @@
   );
   box-shadow: 0 0 0 calc(var(--u) * 0.01) oklch(0 0 0 / 0.05);
   color: var(--ink);
-  font-family: var(--font-sans);
+  font-family: var(--app-font), ui-sans-serif, sans-serif;
   font-size: calc(var(--u) * 0.2);
   font-weight: 500;
   line-height: 1;
@@ -387,7 +390,7 @@
   border-radius: calc(var(--u) * 0.09);
   background: linear-gradient(160deg, var(--lcd-top), var(--lcd-bottom));
   color: var(--lcd-ink);
-  font-family: var(--font-mono);
+  font-family: var(--app-font), ui-monospace, monospace;
   text-shadow: 0 1px 0 var(--lcd-shadow);
 }
 

@@ -25,7 +25,7 @@ type Page = "main" | "themes" | "fonts" | "sounds";
 const TITLES: Record<Page, string> = {
   main: "Settings",
   themes: "Themes",
-  fonts: "Typing font",
+  fonts: "Font",
   sounds: "Sound pack",
 };
 
@@ -113,7 +113,7 @@ function MainPage({ onNavigate }: { onNavigate: (page: Page) => void }) {
           }
         />
         <SubpageRow
-          label="Typing font"
+          label="Font"
           onOpen={() => onNavigate("fonts")}
           preview={
             <span className="text-[12px]" style={{ fontFamily: `var(${font?.variable})` }}>

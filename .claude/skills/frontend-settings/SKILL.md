@@ -1,6 +1,6 @@
 ---
 name: frontend-settings
-description: How keyclash's settings drawer is structured - SettingsButton entry with Ctrl/⌘+K, SettingsPanel sections and subpages, the SettingsProvider that applies appearance and persists preferences (localStorage for guests, Neon Postgres for signed-in players), multi-theme CSS via data-accent, typing fonts via data-font, sound packs in Neon Object Storage, and how to add a new setting, theme, font or sound pack. Use when changing the header Audio/Settings buttons, the settings panel, appearance, themes, accents, fonts, sounds, faah mode, show keyboard, live stats, or anything under components/settings or lib/settings.
+description: How keyclash's settings drawer is structured - SettingsButton entry with Ctrl/⌘+K, SettingsPanel sections and subpages, the SettingsProvider that applies appearance and persists preferences (localStorage for guests, Neon Postgres for signed-in players), multi-theme CSS via data-accent, the app-wide font via data-font, sound packs in Neon Object Storage, and how to add a new setting, theme, font or sound pack. Use when changing the header Audio/Settings buttons, the settings panel, appearance, themes, accents, fonts, sounds, faah mode, show keyboard, live stats, or anything under components/settings or lib/settings.
 ---
 
 # Frontend settings (keyclash)
@@ -29,7 +29,7 @@ Provider order (`components/providers.tsx`): `ConsentProvider > PlayerProvider >
 interface Preferences {
   mode: "light" | "dark" | "system";
   accent: Accent;          // theme
-  font: FontId;            // typing font
+  font: FontId;            // font for the whole app
   soundEnabled: boolean;   // master audio (header Audio button)
   soundPack: SoundPackId;  // "synth" | remote packs
   volume: number;          // 0..1
