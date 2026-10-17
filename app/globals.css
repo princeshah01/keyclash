@@ -316,40 +316,88 @@
 }
 
 .kb-cap {
+  --inset-x: calc(var(--u) * 0.12);
+  --inset-top: calc(var(--u) * 0.04);
+  --inset-bottom: calc(var(--u) * 0.19);
+  --wall: color-mix(in oklch, var(--side) 88%, black);
+  --bevel: oklch(0 0 0 / 0.26);
   position: relative;
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: calc(var(--u) * 0.14);
-  background: linear-gradient(180deg, var(--side) 0%, var(--edge) 100%);
+  border-radius: calc(var(--u) * 0.06);
+  background:
+    linear-gradient(
+      90deg,
+      var(--wall) 0,
+      var(--wall) var(--inset-x),
+      transparent var(--inset-x),
+      transparent calc(100% - var(--inset-x)),
+      var(--wall) calc(100% - var(--inset-x)),
+      var(--wall) 100%
+    ),
+    linear-gradient(180deg, color-mix(in oklch, var(--side) 94%, white) 0%, var(--side) 100%);
   box-shadow:
-    0 calc(var(--u) * 0.07) 0 var(--edge),
-    0 calc(var(--u) * 0.1) calc(var(--u) * 0.16) oklch(0 0 0 / 0.22);
+    inset 0 0 0 1px oklch(0 0 0 / 0.2),
+    0 calc(var(--u) * 0.05) 0 var(--edge),
+    0 calc(var(--u) * 0.08) calc(var(--u) * 0.12) oklch(0 0 0 / 0.2);
   transform: translateY(0);
   transition:
-    transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
-    box-shadow 140ms ease-out;
+    transform 130ms cubic-bezier(0.2, 0.9, 0.3, 1.25),
+    box-shadow 130ms ease-out;
   will-change: transform;
+}
+
+.kb-cap::before,
+.kb-cap::after {
+  position: absolute;
+  bottom: 0;
+  width: var(--inset-x);
+  height: var(--inset-bottom);
+  content: "";
+  pointer-events: none;
+}
+
+.kb-cap::before {
+  left: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.6px),
+    var(--bevel) 50%,
+    transparent calc(50% + 0.6px)
+  );
+}
+
+.kb-cap::after {
+  right: 0;
+  background: linear-gradient(
+    to bottom left,
+    transparent calc(50% - 0.6px),
+    var(--bevel) 50%,
+    transparent calc(50% + 0.6px)
+  );
 }
 
 .kb-face {
   position: absolute;
-  top: calc(var(--u) * 0.035);
-  right: calc(var(--u) * 0.09);
-  bottom: calc(var(--u) * 0.16);
-  left: calc(var(--u) * 0.09);
+  top: var(--inset-top);
+  right: var(--inset-x);
+  bottom: var(--inset-bottom);
+  left: var(--inset-x);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: calc(var(--u) * 0.07) calc(var(--u) * 0.09);
-  border-radius: calc(var(--u) * 0.1);
-  background: radial-gradient(
-    120% 90% at 50% 15%,
-    color-mix(in oklch, var(--face) 70%, white) 0%,
-    var(--face) 55%,
-    color-mix(in oklch, var(--face) 92%, black) 100%
+  padding: calc(var(--u) * 0.06) calc(var(--u) * 0.08);
+  border-radius: calc(var(--u) * 0.045);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--face) 86%, white) 0%,
+    var(--face) 35%,
+    color-mix(in oklch, var(--face) 95%, black) 100%
   );
-  box-shadow: 0 0 0 calc(var(--u) * 0.01) oklch(0 0 0 / 0.05);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.35),
+    0 0 0 1px oklch(0 0 0 / 0.12);
   color: var(--ink);
   font-family: var(--app-font), ui-sans-serif, sans-serif;
   font-size: calc(var(--u) * 0.2);
@@ -358,10 +406,11 @@
 }
 
 .kb-key[data-pressed] .kb-cap {
-  transform: translateY(calc(var(--u) * 0.06));
+  transform: translateY(calc(var(--u) * 0.045));
   box-shadow:
-    0 calc(var(--u) * 0.012) 0 var(--edge),
-    0 calc(var(--u) * 0.03) calc(var(--u) * 0.05) oklch(0 0 0 / 0.18);
+    inset 0 0 0 1px oklch(0 0 0 / 0.2),
+    0 calc(var(--u) * 0.01) 0 var(--edge),
+    0 calc(var(--u) * 0.025) calc(var(--u) * 0.04) oklch(0 0 0 / 0.18);
   transition-duration: 35ms;
 }
 
