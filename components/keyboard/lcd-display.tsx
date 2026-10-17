@@ -36,7 +36,7 @@ const Mascot = memo(function Mascot({ awake, step }: { awake: boolean; step: num
   return (
     <svg
       aria-hidden
-      className="h-[58%] shrink-0"
+      className="h-[66%] shrink-0"
       shapeRendering="crispEdges"
       style={{
         transform: awake && step % 2 === 1 ? "translateY(-4%)" : "none",
@@ -86,10 +86,10 @@ export function LcdDisplay({ state, taps }: { state: LcdState; taps: number }) {
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-end justify-center gap-[calc(var(--u)*0.04)]">
-        <span className="font-bold text-[calc(var(--u)*0.3)] tabular-nums leading-none tracking-tight">
+        <span className="font-bold text-[calc(var(--u)*0.38)] tabular-nums leading-none tracking-tight">
           {running ? state.wpm : "hi!"}
         </span>
-        <span className="truncate text-[calc(var(--u)*0.115)] uppercase leading-none tracking-[0.12em] opacity-90">
+        <span className="truncate text-[calc(var(--u)*0.13)] uppercase leading-none tracking-[0.12em] opacity-90">
           {running ? ["wpm", state.detail].filter(Boolean).join(" · ") : state.label}
         </span>
       </div>

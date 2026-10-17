@@ -14,10 +14,10 @@ export interface KeyDef {
   y: number;
 }
 
-export const BOARD = { width: 16, height: 6.25 } as const;
-export const DISPLAY = { x: 14, y: 0, w: 2, h: 1 } as const;
+export const BOARD = { width: 16, height: 6 } as const;
+export const DISPLAY = { x: 13.06, y: 0, w: 2.94, h: 1 } as const;
 
-const ROW_Y = [0, 1.25, 2.25, 3.25, 4.25, 5.25] as const;
+const ROW_Y = [0, 1, 2, 3, 4, 5] as const;
 
 type Spec = [
   code: string,
@@ -62,11 +62,8 @@ const fn = (from: number, to: number, tone: KeyTone) =>
 export const KEYS: KeyDef[] = [
   ...row(ROW_Y[0], [
     ["Escape", 1, "accent", "esc"],
-    0.25,
     ...fn(1, 4, "alpha"),
-    0.25,
     ...fn(5, 8, "mod"),
-    0.25,
     ...fn(9, 12, "alpha"),
   ]),
   ...row(ROW_Y[1], [
