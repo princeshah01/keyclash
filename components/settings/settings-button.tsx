@@ -43,16 +43,14 @@ export function SettingsButton() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-keyshortcuts="Control+K Meta+K"
-        className="flex h-9 items-center gap-1.5 rounded-full bg-surface px-3 text-[13px] text-muted transition-colors hover:bg-surface-strong hover:text-foreground"
+        aria-label="Settings"
+        className="flex size-9 items-center justify-center rounded-full bg-surface text-muted transition-colors hover:bg-surface-strong hover:text-foreground"
         onClick={() => setOpen(true)}
         ref={buttonRef}
+        title={`Settings (${shortcut})`}
         type="button"
       >
         <GearSix size={16} weight="duotone" />
-        <span className="hidden md:inline">Settings</span>
-        <kbd className="hidden rounded-md border border-border bg-surface px-1 py-0.5 font-mono text-[10px] text-subtle leading-none lg:inline">
-          {shortcut}
-        </kbd>
       </button>
       <SettingsPanel onOpenChange={handleOpenChange} open={open} shortcut={shortcut} />
     </>

@@ -14,10 +14,11 @@ export function AudioButton() {
       aria-label={enabled ? "Mute audio" : "Unmute audio"}
       aria-pressed={enabled}
       className={cn(
-        "flex h-9 items-center gap-1.5 rounded-full bg-surface px-3 text-[13px] transition-colors hover:bg-surface-strong",
+        "flex size-9 items-center justify-center rounded-full bg-surface transition-colors hover:bg-surface-strong",
         enabled ? "text-muted hover:text-foreground" : "text-subtle",
       )}
       onClick={() => update({ soundEnabled: !enabled })}
+      title={enabled ? "Mute audio" : "Unmute audio"}
       type="button"
     >
       <motion.span
@@ -33,7 +34,6 @@ export function AudioButton() {
           <SpeakerSlash size={16} weight="duotone" />
         )}
       </motion.span>
-      <span className={cn("hidden md:inline", !enabled && "line-through decoration-1")}>Audio</span>
     </button>
   );
 }
