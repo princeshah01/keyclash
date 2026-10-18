@@ -1,8 +1,8 @@
 import { type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
+import { avatarUrlFor } from "@/lib/avatar";
 import { db } from "@/lib/db";
 import { RANKED_DETAILS, RANKED_MODES } from "@/lib/typing/options";
-import { avatarUrlFor } from "./players";
 
 export const LEADERBOARD_RANGES = ["all", "weekly", "daily"] as const;
 export type LeaderboardRange = (typeof LEADERBOARD_RANGES)[number];
