@@ -224,16 +224,16 @@
 }
 
 .kb {
-  --u: calc(100cqw / 16.9);
-  --kb-case: oklch(0.975 0.004 85);
-  --kb-case-shade: oklch(0.9 0.006 85);
-  --kb-plate: oklch(0.9 0.006 85);
-  --kb-brand: oklch(0.7 0.01 85);
+  --u: calc(100cqw / 16.4);
+  --kb-case: oklch(0.3 0.008 240);
+  --kb-case-shade: oklch(0.24 0.008 240);
+  --kb-plate: oklch(0.17 0.006 240);
+  --kb-brand: oklch(0.58 0.01 240);
   --alpha-face: var(--sw-light);
   --alpha-side: color-mix(in oklch, var(--sw-light) 88%, black);
   --alpha-edge: color-mix(in oklch, var(--sw-light) 76%, black);
   --alpha-ink: var(--ink-light);
-  --mod-face: var(--sw-dark);
+  --mod-face: color-mix(in oklch, var(--sw-dark) 88%, white);
   --mod-side: color-mix(in oklch, var(--sw-dark) 84%, black);
   --mod-edge: color-mix(in oklch, var(--sw-dark) 66%, black);
   --mod-ink: var(--ink-dark);
@@ -246,8 +246,8 @@
   --lcd-ink: oklch(0.99 0.01 230);
   --lcd-shadow: color-mix(in oklch, var(--primary) 60%, black);
   position: relative;
-  padding: calc(var(--u) * 0.45);
-  border-radius: calc(var(--u) * 0.5);
+  padding: calc(var(--u) * 0.2) calc(var(--u) * 0.2) calc(var(--u) * 0.32);
+  border-radius: calc(var(--u) * 0.3);
   background: linear-gradient(
     180deg,
     var(--kb-case) 0%,
@@ -256,19 +256,14 @@
   );
   box-shadow:
     0 calc(var(--u) * 0.06) 0 var(--kb-case-shade),
-    0 calc(var(--u) * 0.5) calc(var(--u) * 1) calc(var(--u) * -0.2) oklch(0.3 0.02 60 / 0.25),
-    inset 0 1px 0 oklch(1 0 0 / 0.8);
+    0 calc(var(--u) * 0.5) calc(var(--u) * 1) calc(var(--u) * -0.2) oklch(0.2 0.02 240 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.12);
 }
 
 .dark .kb {
-  --kb-case: oklch(0.31 0.008 240);
-  --kb-case-shade: oklch(0.25 0.008 240);
-  --kb-plate: oklch(0.17 0.006 240);
-  --kb-brand: oklch(0.55 0.01 240);
   --alpha-face: color-mix(in oklch, var(--sw-light) 90%, black);
   --alpha-side: color-mix(in oklch, var(--sw-light) 78%, black);
   --alpha-edge: color-mix(in oklch, var(--sw-light) 62%, black);
-  --mod-face: color-mix(in oklch, var(--sw-dark) 88%, white);
 }
 
 :root[data-accent="keyclash"] .kb {
@@ -420,12 +415,12 @@
 
 .kb-lcd {
   position: absolute;
-  padding: calc(var(--u) * 0.06);
-  border-radius: calc(var(--u) * 0.16);
-  background: oklch(0.22 0.01 250);
+  padding: calc(var(--u) * 0.03);
+  border-radius: calc(var(--u) * 0.1);
+  background: oklch(0.14 0.008 250);
   box-shadow:
-    inset 0 calc(var(--u) * 0.03) calc(var(--u) * 0.06) oklch(0 0 0 / 0.6),
-    0 calc(var(--u) * 0.03) 0 oklch(1 0 0 / 0.5);
+    inset 0 calc(var(--u) * 0.02) calc(var(--u) * 0.04) oklch(0 0 0 / 0.6),
+    0 0 0 1px oklch(1 0 0 / 0.06);
 }
 
 .kb-screen {
@@ -436,7 +431,7 @@
   gap: calc(var(--u) * 0.1);
   overflow: hidden;
   padding: 0 calc(var(--u) * 0.12);
-  border-radius: calc(var(--u) * 0.09);
+  border-radius: calc(var(--u) * 0.07);
   background: linear-gradient(160deg, var(--lcd-top), var(--lcd-bottom));
   color: var(--lcd-ink);
   font-family: var(--app-font), ui-monospace, monospace;

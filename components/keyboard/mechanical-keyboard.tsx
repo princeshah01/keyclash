@@ -223,7 +223,7 @@ export function MechanicalKeyboard({ className, lcd, sound }: MechanicalKeyboard
             <LcdDisplay state={lcd} taps={taps} />
           </div>
         </div>
-        <span className="absolute right-[calc(var(--u)*0.55)] bottom-[calc(var(--u)*0.12)] font-semibold text-[calc(var(--u)*0.14)] text-[var(--kb-brand)] lowercase tracking-[0.3em]">
+        <span className="absolute right-[calc(var(--u)*0.3)] bottom-[calc(var(--u)*0.07)] font-semibold text-[calc(var(--u)*0.12)] text-[var(--kb-brand)] lowercase leading-none tracking-[0.3em]">
           keyclash 75
         </span>
       </div>
