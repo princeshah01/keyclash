@@ -215,7 +215,7 @@ export function MechanicalKeyboard({ className, lcd, sound }: MechanicalKeyboard
   }, [press, release]);
 
   return (
-    <div className={cn("kb-root w-full", className)}>
+    <div className={cn("kb-root w-[80%]", className)}>
       <div className="kb">
         <div className="kb-plate">
           <KeyField onPress={press} onRelease={release} register={register} />
