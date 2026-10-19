@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -76,6 +77,32 @@ export const results = pgTable(
   ],
 );
 
+export const rooms = pgTable("rooms", {
+  id: uuid().primaryKey().defaultRandom(),
+  code: text().notNull().unique(),
+  name: text().notNull(),
+  ownerId: uuid().references(() => players.id, { onDelete: "set null" }),
+  createdAt: createdAt(),
+});
+
+export const roomMembers = pgTable(
+  "room_members",
+  {
+    roomId: uuid()
+      .notNull()
+      .references(() => rooms.id, { onDelete: "cascade" }),
+    playerId: uuid()
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    joinedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.roomId, table.playerId] }),
+    index("room_members_player_idx").on(table.playerId),
+  ],
+);
+
 export type Player = typeof players.$inferSelect;
 export type Result = typeof results.$inferSelect;
 export type NewResult = typeof results.$inferInsert;
+export type Room = typeof rooms.$inferSelect;

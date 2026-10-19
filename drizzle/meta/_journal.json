@@ -15,6 +15,13 @@
       "when": 1792504678769,
       "tag": "0001_player_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792509544970,
+      "tag": "0002_rooms",
+      "breakpoints": true
     }
   ]
 }

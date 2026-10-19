@@ -1,9 +1,10 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { getSessionUser } from "@/lib/auth/server";
+import { avatarUrlFor } from "@/lib/avatar";
 import { db } from "@/lib/db";
-import { type Player, players, results } from "@/lib/db/schema";
+import { type Player, players, results, rooms } from "@/lib/db/schema";
 import { type Preferences, parsePreferences } from "@/lib/settings/options";
 import { cookieDefaults, HttpError, isUniqueViolation } from "./http";
 import { NAME_PATTERN, nameFromProfile, randomGuestName } from "./names";
@@ -23,14 +24,6 @@ export interface PublicPlayer {
   isGuest: boolean;
   name: string;
   nameEdited: boolean;
-}
-
-export function avatarUrlFor(player: Pick<Player, "id" | "avatarKey" | "image">) {
-  if (player.avatarKey) {
-    const version = player.avatarKey.split("/").at(-1)?.split(".")[0] ?? "1";
-    return `/api/avatars/${player.id}?v=${version}`;
-  }
-  return player.image ? `/api/avatars/${player.id}?v=oauth` : null;
 }
 
 export function toPublicPlayer(player: Player): PublicPlayer {
@@ -147,6 +140,12 @@ async function mergeGuestInto(guest: Player, target: Player) {
     if (!target.avatarKey && guest.avatarKey) {
       await tx.update(players).set({ avatarKey: guest.avatarKey }).where(eq(players.id, target.id));
     }
+    await tx.execute(sql`
+      insert into room_members (room_id, player_id, joined_at)
+      select room_id, ${target.id}, joined_at from room_members where player_id = ${guest.id}
+      on conflict do nothing
+    `);
+    await tx.update(rooms).set({ ownerId: target.id }).where(eq(rooms.ownerId, guest.id));
     await tx.delete(players).where(and(eq(players.id, guest.id), isNull(players.authUserId)));
   });
   return (await findPlayer(target.id)) ?? target;
