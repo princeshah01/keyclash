@@ -10,6 +10,7 @@ import { useSettings } from "@/components/settings/settings-provider";
 import { ResultsScreen } from "@/components/typing/results-screen";
 import { TestToolbar } from "@/components/typing/test-toolbar";
 import { WordItem } from "@/components/typing/word-item";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useTypingTest } from "@/hooks/use-typing-test";
 import { playMistake, preloadMistake } from "@/lib/keyboard/sound";
 import { modeDetailOf } from "@/lib/typing/options";
@@ -70,6 +71,7 @@ function RestartButton({ onRestart, visible }: { onRestart: () => void; visible:
 export function TypingTest() {
   const { setTypingActive } = useChrome();
   const { preferences } = useSettings();
+  const touch = useMediaQuery("(pointer: coarse)");
   const faahActive = preferences.faahMode && preferences.soundEnabled;
   const { mistakeSound, volume } = preferences;
   const handleMistake = useCallback(() => {
@@ -222,9 +224,9 @@ export function TypingTest() {
               autoCapitalize="none"
               autoComplete="off"
               autoCorrect="off"
-              className="absolute size-0 opacity-0"
+              className="absolute top-0 left-0 size-px opacity-0"
               onBlur={test.handleBlur}
-              onChange={() => undefined}
+              onChange={test.handleInput}
               onFocus={test.handleFocus}
               onKeyDown={test.handleKeyDown}
               ref={inputRef}
@@ -270,7 +272,7 @@ export function TypingTest() {
                   transition={{ duration: 0.2 }}
                 >
                   <CursorClick size={16} weight="duotone" />
-                  click or press any key to focus
+                  {touch ? "tap here to start typing" : "click or press any key to focus"}
                 </motion.span>
               )}
             </AnimatePresence>

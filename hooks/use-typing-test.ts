@@ -1,6 +1,13 @@
 "use client";
 
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { readConsent } from "@/lib/client/consent";
 import {
   DEFAULT_OPTIONS,
@@ -232,6 +239,18 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
     };
   }, [startFresh]);
 
+  // The input unmounts behind the results screen, so refocus it once it's back
+  // and record whether that worked: mobile browsers only open the keyboard
+  // from a tap, and the "tap to focus" overlay must show when they refuse.
+  useEffect(() => {
+    if (finished) {
+      return;
+    }
+    const input = inputRef.current;
+    input?.focus();
+    setFocused(document.activeElement === input);
+  }, [finished]);
+
   const startTimer = useCallback((limit: number) => {
     let ticks = 0;
     timerRef.current = setInterval(() => {
@@ -341,6 +360,89 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
     measureRow();
   }, [typed, wordIndex, wordInputs, measureRow]);
 
+  // Applies one typed character, space or Backspace to the test.
+  const applyKey = useCallback(
+    (key: string, repeat: boolean) => {
+      if (finished) {
+        return;
+      }
+
+      if (!repeat) {
+        thocksRef.current += 1;
+      }
+      ensureStarted();
+      markTyping();
+      const target = words[wordIndex] ?? "";
+
+      if (key === " ") {
+        if (typed.length === 0) {
+          return;
+        }
+        allTypedRef.current += 1;
+        secondErrorsRef.current += countWordErrors(typed, target);
+        const nextInputs = [...wordInputs, typed];
+        const nextIndex = wordIndex + 1;
+        recordWordSnapshot(nextInputs, nextIndex);
+        setWordInputs(nextInputs);
+        if (nextIndex >= words.length) {
+          finishTest();
+          return;
+        }
+        setWordIndex(nextIndex);
+        setTyped("");
+        extendIfNeeded(nextIndex);
+        measureRow();
+        return;
+      }
+
+      if (key === "Backspace") {
+        if (typed.length > 0) {
+          const last = typed.length - 1;
+          if (last >= target.length || typed[last] !== target[last]) {
+            correctedErrorsRef.current += 1;
+          }
+          setTyped(typed.slice(0, -1));
+        } else if (wordIndex > 0) {
+          setWordIndex(wordIndex - 1);
+          setTyped(wordInputs[wordIndex - 1] ?? "");
+          setWordInputs(wordInputs.slice(0, -1));
+          measureRow();
+        }
+        return;
+      }
+
+      allTypedRef.current += 1;
+      const nextTyped = typed + key;
+      setTyped(nextTyped);
+      if (typed.length >= target.length || key !== target[typed.length]) {
+        onMistakeRef.current?.();
+      }
+
+      const isLastWord = wordIndex + 1 >= words.length;
+      if (isLastWord && !isOpenEnded(options) && nextTyped.length >= target.length) {
+        secondErrorsRef.current += countWordErrors(nextTyped, target);
+        const nextInputs = [...wordInputs, nextTyped];
+        setWordInputs(nextInputs);
+        recordWordSnapshot(nextInputs, wordIndex + 1);
+        finishTest();
+      }
+    },
+    [
+      ensureStarted,
+      extendIfNeeded,
+      finishTest,
+      finished,
+      markTyping,
+      measureRow,
+      options,
+      recordWordSnapshot,
+      typed,
+      wordIndex,
+      wordInputs,
+      words,
+    ],
+  );
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       const { key, altKey, ctrlKey, metaKey, shiftKey, repeat } = event;
@@ -382,89 +484,38 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
         }
         return;
       }
-      if (finished || (key.length > 1 && key !== "Backspace")) {
+      if (key.length > 1 && key !== "Backspace") {
         return;
       }
-
-      if (!repeat) {
-        thocksRef.current += 1;
-      }
-      ensureStarted();
-      markTyping();
-      const target = words[wordIndex] ?? "";
-
-      if (key === " ") {
-        event.preventDefault();
-        if (typed.length === 0) {
-          return;
-        }
-        allTypedRef.current += 1;
-        secondErrorsRef.current += countWordErrors(typed, target);
-        const nextInputs = [...wordInputs, typed];
-        const nextIndex = wordIndex + 1;
-        recordWordSnapshot(nextInputs, nextIndex);
-        setWordInputs(nextInputs);
-        if (nextIndex >= words.length) {
-          finishTest();
-          return;
-        }
-        setWordIndex(nextIndex);
-        setTyped("");
-        extendIfNeeded(nextIndex);
-        measureRow();
-        return;
-      }
-
-      if (key === "Backspace") {
-        event.preventDefault();
-        if (typed.length > 0) {
-          const last = typed.length - 1;
-          if (last >= target.length || typed[last] !== target[last]) {
-            correctedErrorsRef.current += 1;
-          }
-          setTyped(typed.slice(0, -1));
-        } else if (wordIndex > 0) {
-          setWordIndex(wordIndex - 1);
-          setTyped(wordInputs[wordIndex - 1] ?? "");
-          setWordInputs(wordInputs.slice(0, -1));
-          measureRow();
-        }
-        return;
-      }
-
-      allTypedRef.current += 1;
-      const nextTyped = typed + key;
-      setTyped(nextTyped);
-      if (typed.length >= target.length || key !== target[typed.length]) {
-        onMistakeRef.current?.();
-      }
-
-      const isLastWord = wordIndex + 1 >= words.length;
-      if (isLastWord && !isOpenEnded(options) && nextTyped.length >= target.length) {
-        secondErrorsRef.current += countWordErrors(nextTyped, target);
-        const nextInputs = [...wordInputs, nextTyped];
-        setWordInputs(nextInputs);
-        recordWordSnapshot(nextInputs, wordIndex + 1);
-        finishTest();
-      }
+      event.preventDefault();
+      applyKey(key, repeat);
     },
     [
+      applyKey,
       deleteWord,
       ensureStarted,
-      extendIfNeeded,
       finishTest,
       finished,
       markTyping,
-      measureRow,
       options,
-      recordWordSnapshot,
       restart,
       started,
-      typed,
-      wordIndex,
-      wordInputs,
-      words,
     ],
+  );
+
+  // Mobile keyboards report most keys as "Unidentified" on keydown, so the
+  // text only shows up as a change to the input's value. Diff it against what
+  // we've recorded and replay the difference as a key.
+  const handleInput = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      if (value.length === typed.length + 1 && value.startsWith(typed)) {
+        applyKey(value.slice(-1), false);
+      } else if (value.length < typed.length && typed.startsWith(value)) {
+        applyKey("Backspace", false);
+      }
+    },
+    [applyKey, typed],
   );
 
   const handleMouseMove = useCallback(() => {
@@ -528,6 +579,7 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
     inputRef,
     activeWordRef,
     handleKeyDown,
+    handleInput,
     handleMouseMove,
     handleBlur: () => setFocused(false),
     handleFocus: () => setFocused(true),
