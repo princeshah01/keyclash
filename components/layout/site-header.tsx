@@ -67,11 +67,16 @@ export function SiteHeader() {
   return (
     <motion.header
       animate={{ opacity: typingActive && !peek ? 0.12 : 1 }}
-      className="sticky top-0 z-40 flex justify-center bg-[color-mix(in_oklch,var(--page)_78%,transparent)] px-4 py-4 backdrop-blur-2xl md:px-10 md:py-5"
+      className="sticky top-0 z-40 flex justify-center px-4 py-4 md:px-10 md:py-5"
       onMouseMove={handleMouseMove}
       transition={{ duration: 0.4, ease: "easeInOut" }}
     >
-      <div className="flex w-full max-w-5xl items-center justify-between gap-3">
+      {/* Blur on a sibling layer — backdrop-filter on the header itself traps fixed menus (settings). */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[color-mix(in_oklch,var(--page)_78%,transparent)] backdrop-blur-2xl"
+      />
+      <div className="relative flex w-full max-w-5xl items-center justify-between gap-3">
         <Link
           className="flex items-center gap-2 font-semibold text-foreground text-xl tracking-tight"
           href="/"
