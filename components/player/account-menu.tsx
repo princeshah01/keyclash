@@ -6,12 +6,37 @@ import { useState } from "react";
 import { GoogleButton } from "@/components/player/google-button";
 import { NameEditor } from "@/components/player/name-editor";
 import { usePlayer } from "@/components/player/player-provider";
+import { AVATAR_ACCEPT, useAvatarUpload } from "@/components/player/use-avatar-upload";
 import { Avatar } from "@/components/ui/avatar";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Popover } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const itemClass =
   "flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-muted text-sm transition-colors hover:bg-surface hover:text-foreground";
+
+function MenuAvatar() {
+  const { player, pending, error, upload, remove, canRemove } = useAvatarUpload();
+  if (!player) {
+    return null;
+  }
+  return (
+    <div className="flex flex-col items-center">
+      <ImageUpload
+        accept={AVATAR_ACCEPT}
+        loading={pending !== null}
+        name={player.name}
+        onRemove={canRemove ? remove : undefined}
+        onSelect={upload}
+        size="sm"
+        src={player.avatarUrl}
+      />
+      {error && (
+        <p className="mt-1 max-w-24 text-center text-[10px] text-danger leading-tight">{error}</p>
+      )}
+    </div>
+  );
+}
 
 export function AccountMenu() {
   const { player, status, signOut } = usePlayer();
@@ -68,7 +93,7 @@ export function AccountMenu() {
       }
     >
       <div className="flex items-center gap-3 p-2.5">
-        <Avatar name={player.name} size={44} src={player.avatarUrl} />
+        <MenuAvatar />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <NameEditor />
           <p className="truncate text-subtle text-xs">
