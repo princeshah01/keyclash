@@ -15,6 +15,7 @@ import { CookieBanner } from "@/components/consent/cookie-banner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Providers } from "@/components/providers";
 import { BOOT_SCRIPT } from "@/lib/settings/apply";
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -63,14 +64,59 @@ const fontVariables = [
 ].map((font) => font.variable);
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "keyclash — typing test & global leaderboard",
-    template: "%s · keyclash",
+    default: SITE_TITLE,
+    template: `%s · ${SITE_NAME}`,
   },
-  description:
-    "A fast, minimal typing test. Race the clock in time, words, quote or zen mode and climb the global leaderboard.",
-  applicationName: "keyclash",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: SITE_KEYWORDS,
+  category: "games",
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
 };
+
+const STRUCTURED_DATA = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      alternateName: ["keyclash typing test", "key clash"],
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+    },
+    {
+      "@type": "WebApplication",
+      "@id": `${SITE_URL}/#app`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      applicationCategory: "GameApplication",
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript",
+      isAccessibleForFree: true,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  ],
+}).replace(/</g, "\\u003c");
 
 export const viewport: Viewport = {
   themeColor: [
@@ -92,6 +138,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script id="settings-boot" strategy="beforeInteractive">
           {BOOT_SCRIPT}
         </Script>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD, `<` escaped
+          dangerouslySetInnerHTML={{ __html: STRUCTURED_DATA }}
+          type="application/ld+json"
+        />
       </head>
       <body suppressHydrationWarning>
         <Providers>

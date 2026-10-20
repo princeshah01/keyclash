@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { JoinRoom } from "@/components/rooms/join-room";
 
-export const metadata = { title: "Join room" };
+export const metadata = { title: "Join room", robots: { index: false, follow: false } };
 
 export default function JoinRoomPage({ params }: PageProps<"/r/[code]">) {
   return (

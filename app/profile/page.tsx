@@ -1,6 +1,6 @@
 import { ProfileView } from "@/components/profile/profile-view";
 
-export const metadata = { title: "Profile" };
+export const metadata = { title: "Profile", robots: { index: false, follow: false } };
 
 export default function ProfilePage() {
   return (

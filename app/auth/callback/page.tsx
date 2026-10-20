@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { AuthCallback } from "@/components/player/auth-callback";
 
-export const metadata = { title: "Signing in" };
+export const metadata = { title: "Signing in", robots: { index: false, follow: false } };
 
 export default function AuthCallbackPage() {
   return (
