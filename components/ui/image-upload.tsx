@@ -6,9 +6,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const SIZES = {
-  sm: { box: 56, icon: 14, label: "text-[9px]" },
-  default: { box: 80, icon: 16, label: "text-[10px]" },
-  lg: { box: 96, icon: 18, label: "text-[11px]" },
+  sm: { box: 56, icon: 12, spinner: 16, label: "text-[7px]", showLabel: false },
+  default: { box: 80, icon: 11, spinner: 20, label: "text-[8px]", showLabel: true },
+  lg: { box: 96, icon: 12, spinner: 22, label: "text-[9px]", showLabel: true },
 } as const;
 
 export interface ImageUploadProps {
@@ -26,7 +26,7 @@ export interface ImageUploadProps {
 }
 
 const overlayButton =
-  "flex flex-1 items-center justify-center gap-1 bg-black/55 font-semibold text-white uppercase tracking-wider transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  "flex flex-1 flex-col items-center justify-center gap-0.5 bg-black/55 font-semibold text-white uppercase leading-none tracking-[0.14em] transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
 export function ImageUpload({
   accept = "image/png,image/jpeg,image/webp,image/gif",
@@ -99,7 +99,7 @@ export function ImageUpload({
 
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <CircleNotch className="animate-spin text-white" size={dims.icon + 4} weight="bold" />
+            <CircleNotch className="animate-spin text-white" size={dims.spinner} weight="bold" />
           </div>
         )}
 
@@ -114,27 +114,34 @@ export function ImageUpload({
             {canRemove && (
               <button
                 aria-label="Remove photo"
-                className={cn(overlayButton, dims.label, "hover:bg-danger/85")}
+                className={cn(overlayButton, dims.label, "justify-end pb-[9%] hover:bg-danger/85")}
                 disabled={!interactive}
                 onClick={remove}
                 onPointerDown={(event) => {
                   pointerRef.current = event.pointerType;
                 }}
+                title="Remove photo"
                 type="button"
               >
-                <Trash size={dims.icon - 2} weight="bold" />
-                remove
+                <Trash size={dims.icon} weight="bold" />
+                {dims.showLabel && "remove"}
               </button>
             )}
             <button
               aria-label={src ? "Change photo" : emptyHint}
-              className={cn(overlayButton, dims.label, "hover:bg-primary/85")}
+              className={cn(
+                overlayButton,
+                dims.label,
+                canRemove && "justify-start pt-[9%]",
+                "hover:bg-primary/85",
+              )}
               disabled={!interactive}
               onClick={pick}
+              title={src ? "Change photo" : emptyHint}
               type="button"
             >
-              <UploadSimple size={dims.icon - 2} weight="bold" />
-              {src ? "change" : "upload"}
+              <UploadSimple size={dims.icon} weight="bold" />
+              {dims.showLabel && (src ? "change" : "upload")}
             </button>
           </div>
         )}
