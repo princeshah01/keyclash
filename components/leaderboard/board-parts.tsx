@@ -4,7 +4,6 @@ import { At, Crown, Hash, Keyboard } from "@phosphor-icons/react";
 import { LayoutGroup, motion } from "motion/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { LiveStatus } from "@/components/realtime/live-query";
 import { Avatar } from "@/components/ui/avatar";
 import { buttonClass } from "@/components/ui/button";
 import { pillGroupClass, SelectPill } from "@/components/ui/pills";
@@ -13,8 +12,26 @@ import { RANKED_DETAILS, RANKED_MODES, type RankedMode } from "@/lib/typing/opti
 import { cn, timeAgo } from "@/lib/utils";
 
 export const MEDALS = ["text-gold", "text-silver", "text-bronze"] as const;
+/** Visible rows on global and room boards; viewer rank is always included separately when outside. */
+export const BOARD_TOP = 10;
 
 const spring = { type: "spring", stiffness: 420, damping: 38 } as const;
+
+export function splitBoard(entries: LeaderboardEntry[], playerId: string | undefined) {
+  const top = entries.filter((entry) => entry.rank <= BOARD_TOP);
+  const me = playerId ? entries.find((entry) => entry.playerId === playerId) : undefined;
+  const meOutside = Boolean(me && !top.some((entry) => entry.playerId === me.playerId));
+  return { top, me: meOutside ? me : undefined };
+}
+
+/** Right-aligned board scope line used on global, rooms, and the home panel. */
+export function BoardScope({ roomName }: { roomName?: string }) {
+  return (
+    <p className="text-right text-[11px] text-subtle">
+      top {BOARD_TOP} players · {roomName ? `in ${roomName}` : "worldwide"}
+    </p>
+  );
+}
 
 export function Modifiers({ entry }: { entry: LeaderboardEntry }) {
   if (!(entry.punctuation || entry.numbers)) {
@@ -24,34 +41,6 @@ export function Modifiers({ entry }: { entry: LeaderboardEntry }) {
     <span className="flex items-center gap-0.5 text-subtle">
       {entry.punctuation && <At aria-label="punctuation" size={12} weight="bold" />}
       {entry.numbers && <Hash aria-label="numbers" size={12} weight="bold" />}
-    </span>
-  );
-}
-
-export function LiveBadge({ status }: { status: LiveStatus }) {
-  const label = { loading: "connecting", live: "live", updating: "syncing", error: "offline" }[
-    status
-  ];
-  return (
-    <span
-      className={cn(
-        "flex items-center gap-1.5 rounded-full px-2 py-0.5 font-medium text-[10px] uppercase tracking-[0.16em]",
-        status === "live" ? "bg-primary-soft text-primary" : "bg-surface text-subtle",
-        status === "error" && "text-danger",
-      )}
-    >
-      <span className="relative flex size-1.5">
-        {status === "live" && (
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
-        )}
-        <span
-          className={cn(
-            "relative inline-flex size-1.5 rounded-full",
-            status === "live" ? "bg-primary" : status === "error" ? "bg-danger" : "bg-subtle",
-          )}
-        />
-      </span>
-      {label}
     </span>
   );
 }
@@ -249,6 +238,23 @@ export function Row({
         </>
       )}
     </motion.li>
+  );
+}
+
+export function YourRank({
+  compact = false,
+  entry,
+}: {
+  compact?: boolean;
+  entry: LeaderboardEntry;
+}) {
+  return (
+    <div className="flex flex-col gap-1 border-border border-t border-dashed pt-4">
+      <span className="px-3 text-[10px] text-subtle uppercase tracking-[0.18em]">your rank</span>
+      <ul>
+        <Row compact={compact} entry={entry} isMe />
+      </ul>
+    </div>
   );
 }
 

@@ -37,25 +37,32 @@ export interface SavedResult {
   ranked: boolean;
 }
 
+export interface RecentResult {
+  accuracy: number;
+  consistency: number;
+  createdAt: string;
+  elapsedSeconds: number;
+  id: string;
+  mode: TestMode;
+  modeDetail: string;
+  numbers: boolean;
+  punctuation: boolean;
+  raw: number;
+  wpm: number;
+}
+
+export interface RecentResultsResponse {
+  /** Id to pass as `cursor` for the next page, or null when finished. */
+  nextCursor: string | null;
+  results: RecentResult[];
+}
+
 export interface PlayerStats {
   bests: {
     accuracy: number;
     createdAt: string;
     mode: TestMode;
     modeDetail: string;
-    wpm: number;
-  }[];
-  recent: {
-    accuracy: number;
-    consistency: number;
-    createdAt: string;
-    elapsedSeconds: number;
-    id: string;
-    mode: TestMode;
-    modeDetail: string;
-    numbers: boolean;
-    punctuation: boolean;
-    raw: number;
     wpm: number;
   }[];
   totals: {

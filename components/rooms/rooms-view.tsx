@@ -213,7 +213,7 @@ export function RoomsView() {
               mode={mode}
               onChange={(next) => navigate({ ...next, room: selected.code })}
             />
-            <RoomBoard code={selected.code} detail={detail} mode={mode} />
+            <RoomBoard code={selected.code} detail={detail} mode={mode} roomName={selected.name} />
           </motion.div>
         ) : (
           status !== "loading" && (

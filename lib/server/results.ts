@@ -15,6 +15,12 @@ import { validateResult } from "@/lib/typing/validate";
 import { HttpError } from "./http";
 import { rankFor } from "./leaderboard";
 
+export const recentResultsQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  /** First result id of this page (inclusive). Omit for the newest page. */
+  cursor: z.string().uuid().optional(),
+});
+
 const count = z.number().int().min(0).max(20_000);
 
 export const resultInput = z.object({
@@ -143,6 +149,20 @@ export async function saveResult(player: Player, input: ResultInput) {
   };
 }
 
+const recentSelect = {
+  id: results.id,
+  mode: results.mode,
+  modeDetail: results.modeDetail,
+  punctuation: results.punctuation,
+  numbers: results.numbers,
+  wpm: results.wpm,
+  raw: results.raw,
+  accuracy: results.accuracy,
+  consistency: results.consistency,
+  elapsedSeconds: results.elapsedSeconds,
+  createdAt: results.createdAt,
+} as const;
+
 export async function getPlayerStats(playerId: string) {
   const [totals] = await db
     .select({
@@ -167,24 +187,42 @@ export async function getPlayerStats(playerId: string) {
     .where(and(eq(results.playerId, playerId), inArray(results.mode, [...RANKED_MODES])))
     .orderBy(results.mode, results.modeDetail, desc(results.wpm), desc(results.accuracy));
 
-  const recent = await db
-    .select({
-      id: results.id,
-      mode: results.mode,
-      modeDetail: results.modeDetail,
-      punctuation: results.punctuation,
-      numbers: results.numbers,
-      wpm: results.wpm,
-      raw: results.raw,
-      accuracy: results.accuracy,
-      consistency: results.consistency,
-      elapsedSeconds: results.elapsedSeconds,
-      createdAt: results.createdAt,
-    })
-    .from(results)
-    .where(eq(results.playerId, playerId))
-    .orderBy(desc(results.createdAt))
-    .limit(25);
+  return { totals, bests };
+}
 
-  return { totals, bests, recent };
+export async function getRecentResults(
+  playerId: string,
+  input: z.infer<typeof recentResultsQuery>,
+) {
+  const { limit, cursor } = input;
+
+  let cursorFilter: ReturnType<typeof sql> | undefined;
+  if (cursor) {
+    const [anchor] = await db
+      .select({ id: results.id, createdAt: results.createdAt })
+      .from(results)
+      .where(and(eq(results.playerId, playerId), eq(results.id, cursor)))
+      .limit(1);
+    if (!anchor) {
+      throw new HttpError(404, "cursor_not_found", "That page no longer exists");
+    }
+    // Inclusive start: this id is the first row of the requested page.
+    cursorFilter = sql`(${results.createdAt}, ${results.id}) <= (${anchor.createdAt}, ${anchor.id}::uuid)`;
+  }
+
+  const rows = await db
+    .select(recentSelect)
+    .from(results)
+    .where(
+      cursorFilter
+        ? and(eq(results.playerId, playerId), cursorFilter)
+        : eq(results.playerId, playerId),
+    )
+    .orderBy(desc(results.createdAt), desc(results.id))
+    .limit(limit + 1);
+
+  const page = rows.slice(0, limit);
+  const nextCursor = rows.length > limit ? rows[limit]!.id : null;
+
+  return { results: page, nextCursor };
 }

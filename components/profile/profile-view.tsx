@@ -1,20 +1,21 @@
 "use client";
 
-import { At, CircleNotch, Hash, SignOut } from "@phosphor-icons/react";
+import { At, CaretLeft, CaretRight, CircleNotch, Hash, SignOut } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { GoogleButton } from "@/components/player/google-button";
 import { NameEditor } from "@/components/player/name-editor";
 import { usePlayer } from "@/components/player/player-provider";
 import { AvatarUploader } from "@/components/profile/avatar-uploader";
 import { Button, buttonClass } from "@/components/ui/button";
 import { api } from "@/lib/client/api";
-import type { PlayerStats } from "@/lib/client/types";
+import type { PlayerStats, RecentResult, RecentResultsResponse } from "@/lib/client/types";
 import { RANKED_DETAILS, RANKED_MODES } from "@/lib/typing/options";
 import { cn, formatDuration, timeAgo } from "@/lib/utils";
 
 const ease = [0.16, 1, 0.3, 1] as const;
+const RECENT_PAGE_SIZE = 10;
 
 function Section({
   title,
@@ -74,7 +75,7 @@ function AccountCard() {
       </div>
       <div className="w-full sm:w-64">
         {player?.isGuest ? (
-          <GoogleButton label="Save progress with Google" />
+          <GoogleButton label="Connect Google" />
         ) : (
           <Button
             className="w-full"
@@ -95,6 +96,139 @@ function AccountCard() {
         )}
       </div>
     </motion.div>
+  );
+}
+
+function RecentTests() {
+  const [results, setResults] = useState<RecentResult[] | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  /** Cursors used to open each visited page; index 0 is the first page (undefined). */
+  const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async (cursor: string | undefined, index: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({ limit: String(RECENT_PAGE_SIZE) });
+      if (cursor) {
+        params.set("cursor", cursor);
+      }
+      const response = await api<RecentResultsResponse>(`/api/me/results?${params}`);
+      setResults(response.results);
+      setNextCursor(response.nextCursor);
+      setPageIndex(index);
+    } catch (caught: unknown) {
+      setError(caught instanceof Error ? caught.message : "Could not load recent tests");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    setResults(null);
+    setNextCursor(null);
+    setPageCursors([undefined]);
+    setPageIndex(0);
+    void load(undefined, 0);
+  }, [load]);
+
+  const goNext = () => {
+    if (!nextCursor) {
+      return;
+    }
+    const nextIndex = pageIndex + 1;
+    setPageCursors((stack) => {
+      const trimmed = stack.slice(0, nextIndex);
+      trimmed[nextIndex] = nextCursor;
+      return trimmed;
+    });
+    void load(nextCursor, nextIndex);
+  };
+
+  const goPrev = () => {
+    if (pageIndex === 0) {
+      return;
+    }
+    const prevIndex = pageIndex - 1;
+    void load(pageCursors[prevIndex], prevIndex);
+  };
+
+  if (error && !results) {
+    return <p className="text-danger text-sm">{error}</p>;
+  }
+
+  if (loading && !results) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {Array.from({ length: 5 }, (_, index) => (
+          <div className="h-12 animate-pulse rounded-2xl bg-surface" key={index} />
+        ))}
+      </div>
+    );
+  }
+
+  if (results && results.length === 0 && pageIndex === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-surface px-6 py-12 text-center">
+        <p className="text-muted text-sm">No tests yet. Your results will show up here.</p>
+        <Link className={buttonClass("primary", "sm")} href="/">
+          take a test
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <ul className={cn("flex flex-col", loading && "opacity-60")}>
+        <li className="grid grid-cols-[1fr_4rem_4rem] gap-3 px-3 pb-2 text-[10px] text-subtle uppercase tracking-[0.18em] sm:grid-cols-[1fr_4.5rem_4.5rem_4.5rem_4.5rem_7rem]">
+          <span>test</span>
+          <span className="text-right">wpm</span>
+          <span className="text-right">acc</span>
+          <span className="hidden text-right sm:block">raw</span>
+          <span className="hidden text-right sm:block">cons</span>
+          <span className="hidden text-right sm:block">when</span>
+        </li>
+        {results?.map((result) => (
+          <li
+            className="grid grid-cols-[1fr_4rem_4rem] items-center gap-3 rounded-xl px-3 py-2.5 text-sm odd:bg-surface sm:grid-cols-[1fr_4.5rem_4.5rem_4.5rem_4.5rem_7rem]"
+            key={result.id}
+          >
+            <span className="flex items-center gap-1.5 text-muted">
+              {`${result.mode} ${result.modeDetail}`.trim()}
+              {result.punctuation && <At className="text-subtle" size={12} weight="bold" />}
+              {result.numbers && <Hash className="text-subtle" size={12} weight="bold" />}
+            </span>
+            <span className="text-right font-mono font-semibold text-foreground">{result.wpm}</span>
+            <span className="text-right font-mono text-muted">{result.accuracy}%</span>
+            <span className="hidden text-right font-mono text-subtle sm:block">{result.raw}</span>
+            <span className="hidden text-right font-mono text-subtle sm:block">
+              {result.consistency}%
+            </span>
+            <span className="hidden text-right text-subtle text-xs sm:block">
+              {timeAgo(result.createdAt)}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {(pageIndex > 0 || nextCursor) && (
+        <div className="flex items-center justify-end gap-2">
+          <Button disabled={loading || pageIndex === 0} onClick={goPrev} size="sm" variant="ghost">
+            <CaretLeft size={14} weight="bold" />
+            prev
+          </Button>
+          <span className="min-w-16 text-center text-[11px] text-subtle">page {pageIndex + 1}</span>
+          <Button disabled={loading || !nextCursor} onClick={goNext} size="sm" variant="ghost">
+            next
+            <CaretRight size={14} weight="bold" />
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -174,56 +308,7 @@ export function ProfileView() {
       </Section>
 
       <Section delay={0.24} title="recent tests">
-        {!stats && !error ? (
-          <div className="flex flex-col gap-1.5">
-            {Array.from({ length: 5 }, (_, index) => (
-              <div className="h-12 animate-pulse rounded-2xl bg-surface" key={index} />
-            ))}
-          </div>
-        ) : stats && stats.recent.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-3xl bg-surface px-6 py-12 text-center">
-            <p className="text-muted text-sm">No tests yet. Your results will show up here.</p>
-            <Link className={buttonClass("primary", "sm")} href="/">
-              take a test
-            </Link>
-          </div>
-        ) : (
-          <ul className="flex flex-col">
-            <li className="grid grid-cols-[1fr_4rem_4rem] gap-3 px-3 pb-2 text-[10px] text-subtle uppercase tracking-[0.18em] sm:grid-cols-[1fr_4.5rem_4.5rem_4.5rem_4.5rem_7rem]">
-              <span>test</span>
-              <span className="text-right">wpm</span>
-              <span className="text-right">acc</span>
-              <span className="hidden text-right sm:block">raw</span>
-              <span className="hidden text-right sm:block">cons</span>
-              <span className="hidden text-right sm:block">when</span>
-            </li>
-            {stats?.recent.map((result) => (
-              <li
-                className="grid grid-cols-[1fr_4rem_4rem] items-center gap-3 rounded-xl px-3 py-2.5 text-sm odd:bg-surface sm:grid-cols-[1fr_4.5rem_4.5rem_4.5rem_4.5rem_7rem]"
-                key={result.id}
-              >
-                <span className="flex items-center gap-1.5 text-muted">
-                  {`${result.mode} ${result.modeDetail}`.trim()}
-                  {result.punctuation && <At className="text-subtle" size={12} weight="bold" />}
-                  {result.numbers && <Hash className="text-subtle" size={12} weight="bold" />}
-                </span>
-                <span className="text-right font-mono font-semibold text-foreground">
-                  {result.wpm}
-                </span>
-                <span className="text-right font-mono text-muted">{result.accuracy}%</span>
-                <span className="hidden text-right font-mono text-subtle sm:block">
-                  {result.raw}
-                </span>
-                <span className="hidden text-right font-mono text-subtle sm:block">
-                  {result.consistency}%
-                </span>
-                <span className="hidden text-right text-subtle text-xs sm:block">
-                  {timeAgo(result.createdAt)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        {playerId ? <RecentTests key={playerId} /> : null}
       </Section>
     </div>
   );

@@ -1,68 +1,10 @@
 "use client";
 
-import type { SealedLiveQuery } from "@neon/realtime/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { avatarUrlFor } from "@/lib/avatar";
 import type { LeaderboardEntry } from "@/lib/client/types";
 import type { GlobalBoardRow, RoomBoardRow } from "@/lib/server/live";
-import { api } from "./api";
 
 export type { GlobalBoardRow, RoomBoardRow };
-
-interface SealedState<Row> {
-  attempt: number;
-  error?: string;
-  key: string;
-  sealed?: SealedLiveQuery<Row>;
-}
-
-export function useSealedQuery<Row>(endpoint: string | null, body: unknown) {
-  const bodyJson = JSON.stringify(body ?? {});
-  const key = endpoint ? `${endpoint}|${bodyJson}` : "";
-  const [state, setState] = useState<SealedState<Row>>();
-  const [attempt, setAttempt] = useState(0);
-
-  const refreshQuery = useCallback(() => {
-    if (!endpoint) {
-      return Promise.reject(new Error("No live query"));
-    }
-    return api<SealedLiveQuery<Row>>(endpoint, { method: "POST", body: bodyJson });
-  }, [endpoint, bodyJson]);
-
-  useEffect(() => {
-    if (!endpoint) {
-      return;
-    }
-    let cancelled = false;
-    refreshQuery().then(
-      (sealed) => {
-        if (!cancelled) {
-          setState({ key: `${endpoint}|${bodyJson}`, sealed, attempt });
-        }
-      },
-      (error: unknown) => {
-        if (!cancelled) {
-          setState({
-            key: `${endpoint}|${bodyJson}`,
-            attempt,
-            error: error instanceof Error ? error.message : "Could not open live updates",
-          });
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [endpoint, bodyJson, refreshQuery, attempt]);
-
-  const retry = useCallback(() => setAttempt((value) => value + 1), []);
-  const current = state?.key === key ? state : undefined;
-
-  return useMemo(
-    () => ({ sealed: current?.sealed, error: current?.error, refreshQuery, retry }),
-    [current, refreshQuery, retry],
-  );
-}
 
 function toIso(value: Date | string | null) {
   if (!value) {

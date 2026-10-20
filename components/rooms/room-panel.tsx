@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useChrome } from "@/components/layout/chrome-provider";
 import { InviteButton } from "@/components/rooms/room-actions";
 import { RoomBoard } from "@/components/rooms/room-board";
@@ -90,14 +90,6 @@ export function RoomPanel({ detail, mode }: { detail: string; mode: string }) {
   const { typingActive } = useChrome();
   const [busy, setBusy] = useState<"leave" | "all" | null>(null);
   const [confirmAll, setConfirmAll] = useState(false);
-  const docked = Boolean(activeRoom) && !panelHidden;
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.toggleAttribute("data-room-panel", docked);
-    return () => root.removeAttribute("data-room-panel");
-  }, [docked]);
-
   if (!activeRoom) {
     return null;
   }
@@ -166,7 +158,13 @@ export function RoomPanel({ detail, mode }: { detail: string; mode: string }) {
                 Rooms rank time and words tests. Showing time 30.
               </p>
             )}
-            <RoomBoard code={activeRoom.code} compact detail={boardDetail} mode={boardMode} />
+            <RoomBoard
+              code={activeRoom.code}
+              compact
+              detail={boardDetail}
+              mode={boardMode}
+              roomName={activeRoom.name}
+            />
           </div>
 
           <footer className="flex items-center gap-1 border-border border-t px-2 py-2">

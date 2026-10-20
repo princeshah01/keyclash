@@ -67,7 +67,7 @@ export function SiteHeader() {
   return (
     <motion.header
       animate={{ opacity: typingActive && !peek ? 0.12 : 1 }}
-      className="sticky top-0 z-40 flex justify-center px-4 py-4 md:px-10 md:py-5"
+      className="sticky top-0 z-40 flex justify-center bg-[color-mix(in_oklch,var(--page)_78%,transparent)] px-4 py-4 backdrop-blur-2xl md:px-10 md:py-5"
       onMouseMove={handleMouseMove}
       transition={{ duration: 0.4, ease: "easeInOut" }}
     >

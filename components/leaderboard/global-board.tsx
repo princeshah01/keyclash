@@ -3,12 +3,15 @@
 import { WarningCircle } from "@phosphor-icons/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  BOARD_TOP,
+  BoardScope,
   BoardSkeleton,
   EmptyBoard,
-  LiveBadge,
   Podium,
   Row,
+  splitBoard,
   TestFilters,
+  YourRank,
 } from "@/components/leaderboard/board-parts";
 import { usePlayer } from "@/components/player/player-provider";
 import { LiveQuery } from "@/components/realtime/live-query";
@@ -58,21 +61,18 @@ export function GlobalBoard() {
 
   return (
     <LiveQuery<GlobalBoardRow>
-      body={{ ...query, limit: 50 }}
+      body={{ ...query, limit: BOARD_TOP }}
       endpoint={player ? "/api/leaderboard/live" : null}
     >
       {({ rows, status, error }) => {
         const all = (rows ?? []).map(globalRowToEntry);
-        const entries = all.filter((entry) => entry.rank <= 50);
-        const me = all.find((entry) => entry.playerId === player?.id);
-        const meOutside = me && !entries.some((entry) => entry.playerId === me.playerId);
-        const podium = entries.filter((entry) => entry.rank <= 3).slice(0, 3);
-        const rest = entries.slice(podium.length);
-        const total = rows?.[0]?.total ?? 0;
+        const { top, me } = splitBoard(all, player?.id);
+        const podium = top.filter((entry) => entry.rank <= 3).slice(0, 3);
+        const rest = top.slice(podium.length);
 
         return (
           <div className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col gap-3">
               <TestFilters
                 detail={query.detail}
                 idPrefix="global"
@@ -92,10 +92,7 @@ export function GlobalBoard() {
                   ))}
                 </div>
               </TestFilters>
-              <div className="flex items-center gap-2 text-muted text-xs">
-                <LiveBadge status={status} />
-                {rows && `${total} ${total === 1 ? "player" : "players"} ranked`}
-              </div>
+              <BoardScope />
             </div>
 
             {status === "error" && !rows ? (
@@ -105,7 +102,7 @@ export function GlobalBoard() {
               </div>
             ) : rows === undefined ? (
               <BoardSkeleton />
-            ) : entries.length === 0 ? (
+            ) : top.length === 0 ? (
               <EmptyBoard
                 body={`Finish a ${query.mode} ${query.detail} test to claim the top spot.`}
                 title="No scores here yet"
@@ -124,16 +121,7 @@ export function GlobalBoard() {
                     ))}
                   </ul>
                 )}
-                {meOutside && me && (
-                  <div className="flex flex-col gap-1 border-border border-t border-dashed pt-4">
-                    <span className="px-3 text-[10px] text-subtle uppercase tracking-[0.18em]">
-                      your best
-                    </span>
-                    <ul>
-                      <Row entry={me} isMe />
-                    </ul>
-                  </div>
-                )}
+                {me && <YourRank entry={me} />}
               </div>
             )}
           </div>

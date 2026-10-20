@@ -1,7 +1,14 @@
 "use client";
 
 import { Hourglass, WarningCircle } from "@phosphor-icons/react";
-import { BoardSkeleton, LiveBadge, Podium, Row } from "@/components/leaderboard/board-parts";
+import {
+  BoardScope,
+  BoardSkeleton,
+  Podium,
+  Row,
+  splitBoard,
+  YourRank,
+} from "@/components/leaderboard/board-parts";
 import { usePlayer } from "@/components/player/player-provider";
 import { LiveQuery } from "@/components/realtime/live-query";
 import { Avatar } from "@/components/ui/avatar";
@@ -14,26 +21,23 @@ interface RoomBoardProps {
   compact?: boolean;
   detail: string;
   mode: RankedMode;
+  roomName: string;
 }
 
-export function RoomBoard({ code, compact = false, detail, mode }: RoomBoardProps) {
+export function RoomBoard({ code, compact = false, detail, mode, roomName }: RoomBoardProps) {
   const { player } = usePlayer();
 
   return (
     <LiveQuery<RoomBoardRow> body={{ mode, detail }} endpoint={`/api/rooms/${code}/live`}>
       {({ rows, status, error }) => {
         const { ranked, pending } = rankRoomRows(rows ?? []);
-        const podium = compact ? [] : ranked.filter((entry) => entry.rank <= 3).slice(0, 3);
-        const rest = ranked.slice(podium.length);
+        const { top, me } = splitBoard(ranked, player?.id);
+        const podium = compact ? [] : top.filter((entry) => entry.rank <= 3).slice(0, 3);
+        const rest = top.slice(podium.length);
 
         return (
           <div className={cn("flex flex-col", compact ? "gap-3" : "gap-6")}>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] text-subtle">
-                {mode} {detail} · best run per member
-              </span>
-              <LiveBadge status={status} />
-            </div>
+            <BoardScope roomName={roomName} />
 
             {status === "error" && !rows ? (
               <div className="flex flex-col items-center gap-2 py-8 text-center text-danger text-xs">
@@ -57,6 +61,7 @@ export function RoomBoard({ code, compact = false, detail, mode }: RoomBoardProp
                     ))}
                   </ul>
                 )}
+                {me && <YourRank compact={compact} entry={me} />}
                 {ranked.length === 0 && (
                   <p className="rounded-2xl bg-surface px-4 py-5 text-center text-muted text-xs">
                     No {mode} {detail} scores in this room yet. Finish one to take #1.

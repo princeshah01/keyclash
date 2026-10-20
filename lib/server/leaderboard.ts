@@ -18,7 +18,7 @@ export const leaderboardQuery = z
     mode: z.enum(RANKED_MODES).default("time"),
     detail: z.string().default("30"),
     range: z.enum(LEADERBOARD_RANGES).default("all"),
-    limit: z.coerce.number().int().min(1).max(100).default(50),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
   })
   .refine((query) => RANKED_DETAILS[query.mode].includes(query.detail), {
     message: "Unknown leaderboard",
