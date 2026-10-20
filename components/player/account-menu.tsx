@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown, ChartLineUp, CircleNotch, SignOut, Trophy } from "@phosphor-icons/react";
+import { ChartLineUp, CircleNotch, SignOut, Trophy } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import { GoogleButton } from "@/components/player/google-button";
@@ -47,12 +47,11 @@ export function AccountMenu() {
     return (
       <div
         className={cn(
-          "flex h-9 items-center gap-2 rounded-full bg-surface px-1.5 pr-3",
+          "flex size-9 items-center justify-center rounded-full bg-surface",
           status === "loading" && "animate-pulse",
         )}
       >
-        <span className="size-6 rounded-full bg-surface-strong" />
-        <span className="h-3 w-16 rounded bg-surface-strong" />
+        <span className="size-7 rounded-full bg-surface-strong" />
       </div>
     );
   }
@@ -77,18 +76,12 @@ export function AccountMenu() {
         <button
           aria-expanded={open}
           aria-haspopup="dialog"
-          className="flex h-9 items-center gap-2 rounded-full bg-surface py-1 pr-3 pl-1.5 text-sm transition-colors hover:bg-surface-strong"
+          aria-label={`Account menu for ${player.name}`}
+          className="flex size-9 items-center justify-center rounded-full transition-opacity hover:opacity-90"
           onClick={() => setOpen((value) => !value)}
           type="button"
         >
-          <Avatar name={player.name} size={26} src={player.avatarUrl} />
-          <span className="hidden max-w-36 truncate font-medium sm:inline">{player.name}</span>
-          {player.isGuest && (
-            <span className="hidden rounded-full bg-surface-strong px-1.5 py-0.5 font-medium text-[10px] text-muted uppercase tracking-wider md:inline">
-              guest
-            </span>
-          )}
-          <CaretDown className="text-subtle" size={12} weight="bold" />
+          <Avatar name={player.name} size={32} src={player.avatarUrl} />
         </button>
       }
     >
