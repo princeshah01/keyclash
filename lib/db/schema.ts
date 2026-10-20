@@ -63,6 +63,7 @@ export const results = pgTable(
     missedChars: integer().notNull(),
     correctedErrors: integer().notNull(),
     elapsedSeconds: integer().notNull(),
+    thockCount: integer().notNull().default(0),
     history: jsonb().$type<WpmSnapshot[]>().notNull().default([]),
     createdAt: createdAt(),
   },

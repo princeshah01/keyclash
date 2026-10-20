@@ -22,6 +22,8 @@ export interface ResultStats {
   numbers: boolean;
   punctuation: boolean;
   raw: number;
+  /** Key-down thocks recorded during this test. */
+  thocks: number;
   wpm: number;
   wpmHistory: WpmSnapshot[];
 }

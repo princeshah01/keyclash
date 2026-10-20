@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useChrome } from "@/components/layout/chrome-provider";
+import { ThockBadge } from "@/components/layout/thock-badge";
 import { AccountMenu } from "@/components/player/account-menu";
 import { AudioButton } from "@/components/settings/audio-button";
 import { SettingsButton } from "@/components/settings/settings-button";
@@ -88,6 +89,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-2">
+          <ThockBadge />
           <div className="hidden items-center rounded-full bg-surface p-1 sm:flex">
             <Suspense fallback={<NavPills pathname={null} />}>
               <CurrentNavPills />

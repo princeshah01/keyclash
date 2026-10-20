@@ -39,6 +39,7 @@ export const resultInput = z.object({
   missedChars: count,
   correctedErrors: count,
   elapsedSeconds: z.number().int().min(0).max(3600),
+  thocks: z.number().int().min(0).max(100_000).default(0),
   wpmHistory: z
     .array(
       z.object({
@@ -129,6 +130,7 @@ export async function saveResult(player: Player, input: ResultInput) {
       missedChars: input.missedChars,
       correctedErrors: input.correctedErrors,
       elapsedSeconds: input.elapsedSeconds,
+      thockCount: input.thocks,
       history: input.wpmHistory,
     })
     .returning({ id: results.id, createdAt: results.createdAt });

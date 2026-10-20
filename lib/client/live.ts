@@ -2,9 +2,9 @@
 
 import { avatarUrlFor } from "@/lib/avatar";
 import type { LeaderboardEntry } from "@/lib/client/types";
-import type { GlobalBoardRow, RoomBoardRow } from "@/lib/server/live";
+import type { GlobalBoardRow, RoomBoardRow, ThockTotalRow } from "@/lib/server/live";
 
-export type { GlobalBoardRow, RoomBoardRow };
+export type { GlobalBoardRow, RoomBoardRow, ThockTotalRow };
 
 function toIso(value: Date | string | null) {
   if (!value) {

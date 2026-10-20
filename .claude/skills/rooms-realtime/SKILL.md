@@ -14,7 +14,7 @@ Rooms are private leaderboards. Anyone can create one, share `/r/<code>`, and ev
 | Tables | `lib/db/schema.ts` → `rooms` (code, name, owner_id), `room_members` (PK `room_id, player_id`) |
 | Room service | `lib/server/rooms.ts` → create / join / leave / leaveAll / list / requireMembership, caps (50 rooms per player, 100 members per room) |
 | Live queries | `lib/server/live.ts` → `realtime`, `globalBoardQuery`, `roomBoardQuery`, `rangeStart` |
-| Seal endpoints | `app/api/leaderboard/live`, `app/api/rooms/[code]/live` |
+| Seal endpoints | `app/api/leaderboard/live`, `app/api/rooms/[code]/live`, `app/api/thocks/live` (site-wide thock total for the header `ThockBadge`) |
 | Room API | `app/api/rooms` (GET list, POST create), `[code]` (GET preview), `[code]/members` (POST join, DELETE leave), `memberships` (DELETE leave all) |
 | Client plumbing | `components/realtime/realtime-root.tsx`, `components/realtime/live-query.tsx`, `lib/client/live.ts`, `lib/client/live-session.ts` (warm session cache) |
 | State | `components/rooms/rooms-provider.tsx` → rooms, active room, panel hidden |

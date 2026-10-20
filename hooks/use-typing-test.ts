@@ -91,6 +91,7 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
   const allTypedRef = useRef(0);
   const secondErrorsRef = useRef(0);
   const correctedErrorsRef = useRef(0);
+  const thocksRef = useRef(0);
   const finishRef = useRef<() => void>(() => undefined);
   const frozenRef = useRef<ResultStats | null>(null);
 
@@ -153,6 +154,7 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
       allTypedRef.current = 0;
       secondErrorsRef.current = 0;
       correctedErrorsRef.current = 0;
+      thocksRef.current = 0;
       extendingRef.current = false;
       setActive(false);
     },
@@ -341,7 +343,7 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      const { key, altKey, ctrlKey, metaKey, shiftKey } = event;
+      const { key, altKey, ctrlKey, metaKey, shiftKey, repeat } = event;
       const wordDelete =
         (altKey && !ctrlKey && !metaKey && (key === "Backspace" || key === "Delete")) ||
         (ctrlKey && !altKey && !metaKey && key === "Backspace");
@@ -349,6 +351,9 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
       if (wordDelete) {
         event.preventDefault();
         if (!finished) {
+          if (!repeat) {
+            thocksRef.current += 1;
+          }
           ensureStarted();
           markTyping();
           deleteWord();
@@ -381,6 +386,9 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
         return;
       }
 
+      if (!repeat) {
+        thocksRef.current += 1;
+      }
       ensureStarted();
       markTyping();
       const target = words[wordIndex] ?? "";
@@ -490,6 +498,7 @@ export function useTypingTest({ onActiveChange, onMistake }: UseTypingTestProps 
       punctuation: options.punctuation,
       numbers: options.numbers,
       difficulty: options.difficulty,
+      thocks: thocksRef.current,
       wpmHistory: history,
     };
   }

@@ -42,6 +42,10 @@ export interface RoomBoardRow {
   wpm: number | null;
 }
 
+export interface ThockTotalRow {
+  total: number;
+}
+
 export function rangeStart(range: LeaderboardRange, now = new Date()) {
   if (range === "all") {
     return new Date(0);
@@ -79,6 +83,13 @@ export function globalBoardQuery(input: {
      WHERE ranked.rank <= $4 OR ranked.player_id = $5::uuid
      ORDER BY ranked.rank ASC, ranked.created_at ASC`,
     [input.mode, input.detail, pgParam.timestamptz(input.since), input.limit, input.playerId],
+  );
+}
+
+export function thockTotalQuery() {
+  return rawSql<ThockTotalRow>(
+    "SELECT coalesce(sum(thock_count), 0)::int AS total FROM results",
+    [],
   );
 }
 

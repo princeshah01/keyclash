@@ -1,28 +1,42 @@
 "use client";
 
-import { animate, motion, useMotionValue, useTransform } from "motion/react";
-import { useEffect } from "react";
+import NumberFlow from "@number-flow/react";
+import { useEffect, useState } from "react";
 
 interface AnimatedNumberProps {
   className?: string;
+  /** Duration in ms for the digit transform. Default 1200. */
   duration?: number;
+  /** Initial value to animate from. Default 0. */
+  from?: number;
+  /** Suffix appended after the number (e.g. "%", "s"). */
   suffix?: string;
   value: number;
 }
 
+/** Number-flow animated counter. Mounts at `from`, then rolls to `value`. */
 export function AnimatedNumber({
   className,
-  duration = 0.9,
-  suffix = "",
+  duration = 1200,
+  from = 0,
+  suffix,
   value,
 }: AnimatedNumberProps) {
-  const motionValue = useMotionValue(0);
-  const display = useTransform(motionValue, (latest) => `${Math.round(latest)}${suffix}`);
+  const [display, setDisplay] = useState(from);
 
   useEffect(() => {
-    const controls = animate(motionValue, value, { duration, ease: [0.16, 1, 0.3, 1] });
-    return () => controls.stop();
-  }, [motionValue, value, duration]);
+    requestAnimationFrame(() => setDisplay(value));
+  }, [value]);
 
-  return <motion.span className={className}>{display}</motion.span>;
+  return (
+    <NumberFlow
+      className={className}
+      format={{ useGrouping: true }}
+      locales="en-US"
+      suffix={suffix}
+      transformTiming={{ duration, easing: "ease-out" }}
+      value={display}
+      willChange
+    />
+  );
 }
