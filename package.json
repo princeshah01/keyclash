@@ -15,7 +15,8 @@
     "db:studio": "drizzle-kit studio",
     "neon:deploy": "neon deploy",
     "sounds:upload": "tsx scripts/generate-sounds.mts --upload",
-    "sounds:mistakes": "tsx scripts/upload-mistake-sounds.mts"
+    "sounds:mistakes": "tsx scripts/upload-mistake-sounds.mts",
+    "sounds:thock": "tsx scripts/upload-thock-pack.mts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1153.0",

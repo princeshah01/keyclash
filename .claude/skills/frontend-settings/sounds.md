@@ -36,6 +36,15 @@ Each key in `lib/keyboard/layout.ts` has a `sound` profile: `alpha`, `mod`, `spa
 
 The picker, preloading and preview pick it up automatically.
 
+### Custom sample pack (`thock`)
+
+`thock` is built from a source audio file (trimmed to a short key hit) rather than synthesized:
+
+```bash
+npm install --no-save ffmpeg-static   # once, for conversion
+npm run sounds:thock -- path/to/sound.ogg
+```
+
 ## Mistake sounds (faah mode)
 
 Faah mode plays `preferences.mistakeSound` on every wrong key (default `faaah`). The clips are short meme MP3s from myinstants.com. They are **not** committed to git: `scripts/upload-mistake-sounds.mts` lists each source URL, downloads it, checks it is a small MP3, and uploads it to `mistakes/<id>.mp3`.

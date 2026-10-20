@@ -6,7 +6,13 @@ export const PACK_SAMPLES = ["down-1", "down-2", "down-3", "mod", "space", "ente
 export type PackSample = (typeof PACK_SAMPLES)[number];
 export type RemotePack = Exclude<SoundPackId, "synth">;
 
-export const REMOTE_PACKS: readonly RemotePack[] = ["creamy", "clicky", "typewriter", "bubble"];
+export const REMOTE_PACKS: readonly RemotePack[] = [
+  "creamy",
+  "clicky",
+  "typewriter",
+  "bubble",
+  "thock",
+];
 
 export const packKey = (pack: RemotePack, sample: PackSample) => `packs/${pack}/${sample}.wav`;
 export const mistakeKey = (sound: MistakeSoundId) => `mistakes/${sound}.mp3`;

@@ -1,13 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { config } from "dotenv";
-import {
-  PACK_SAMPLES,
-  type PackSample,
-  packKey,
-  REMOTE_PACKS,
-  type RemotePack,
-} from "../lib/sounds/catalog";
+import { PACK_SAMPLES, type PackSample, packKey, type RemotePack } from "../lib/sounds/catalog";
 
 config({ path: ".env.local", quiet: true });
 
@@ -241,7 +235,8 @@ function bubble(sample: PackSample, seed: number) {
   return track.master();
 }
 
-const RENDERERS: Record<RemotePack, (sample: PackSample, seed: number) => Float32Array> = {
+/** Packs synthesized here. Custom packs (e.g. `thock`) are uploaded from source audio. */
+const RENDERERS: Partial<Record<RemotePack, (sample: PackSample, seed: number) => Float32Array>> = {
   creamy,
   clicky,
   typewriter,
@@ -273,12 +268,13 @@ async function main() {
   const upload = process.argv.includes("--upload");
   const files: [string, Buffer][] = [];
 
-  REMOTE_PACKS.forEach((pack, packIndex) => {
+  (Object.keys(RENDERERS) as RemotePack[]).forEach((pack, packIndex) => {
+    const render = RENDERERS[pack];
+    if (!render) {
+      return;
+    }
     PACK_SAMPLES.forEach((sample, sampleIndex) => {
-      files.push([
-        packKey(pack, sample),
-        toWav(RENDERERS[pack](sample, packIndex * 100 + sampleIndex + 1)),
-      ]);
+      files.push([packKey(pack, sample), toWav(render(sample, packIndex * 100 + sampleIndex + 1))]);
     });
   });
 

@@ -21,7 +21,7 @@ export const FONTS = [
   "roboto-mono",
   "lexend",
 ] as const;
-export const SOUND_PACKS = ["synth", "creamy", "clicky", "typewriter", "bubble"] as const;
+export const SOUND_PACKS = ["synth", "creamy", "clicky", "typewriter", "bubble", "thock"] as const;
 export const MISTAKE_SOUNDS = [
   "faaah",
   "chalo",
@@ -78,6 +78,7 @@ export const SOUND_PACK_OPTIONS: readonly {
   { id: "clicky", label: "Clicky", description: "Crisp tactile click", remote: true },
   { id: "typewriter", label: "Typewriter", description: "Metal strike with a bell", remote: true },
   { id: "bubble", label: "Bubble", description: "Soft popping keys", remote: true },
+  { id: "thock", label: "Thock", description: "Custom deep thock sample", remote: true },
 ];
 
 export const MISTAKE_SOUND_OPTIONS: readonly { id: MistakeSoundId; label: string }[] = [
