@@ -93,7 +93,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {BOOT_SCRIPT}
         </Script>
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           <div className="flex min-h-dvh flex-col">
             <SiteHeader />
